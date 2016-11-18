@@ -1,5 +1,4 @@
 # Myna
-
 A real time human activity recognition SDK for Android
 
 ## Next
@@ -34,4 +33,3 @@ This project is open source, under [Apache 2.0](https://www.apache.org/licenses/
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-

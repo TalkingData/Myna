@@ -1,21 +1,43 @@
 # Myna
 
-Android 平台实时用户行为识别 SDK
+Android 平台场景识别框架
 
-## Next
+![](http://p1.bqimg.com/562611/952bd822efce378b.png)
 
-1. 实现一个工作在独立进程中的 Service，负责传感器数据的采集和实时行为识别。
-2. 添加手持状态识别能力。
-3. 添加对下面行为的实时识别能力：
+Myna 项目中包含一个测试 Demo 工程：demo-myna, 将该工程和 Myna 项目本身导入到 Android Studio 中，就可以开始调试了。
 
-	a. 静止  
-	b. 走  
-	c. 跑  
-	d. 在车上
+Myna 提供了两套接口：
 
-2. 将 SDK 提交到 jcenter。
-3. 提供一个演示如何使用 SDK 的示例应用程序工程。 
+- 面向开发者的接口：开发者只需要简单的接口调用，就能在应用程序中获取实时识别的用户行为状态。
+- 面向数据科学家的接口：数据科学家可以很方便地添加新的识别算法，在运行时调整订阅的传感器类型、采样频率和采样时长，而无需关心 Android 系统相关的传感器数据订阅细节。
 
+目前 Myna 可以识别下面三种行为类型：
+
+1. On_Foot
+2. In_Vehicle
+3. Still
+
+Myna 使用随机森岭分类算法进行实时用户行为识别，内置了一个已经训练好的模型文件，在运行时加载。模型的 ROC 为：
+
+![](http://p1.bqimg.com/562611/13d6243cab1e64d8.png)
+
+## 集成文档
+
+QuickStart.md
+
+## Roadmap
+
+2016 年 12 月
+
+	1. 开源包含训练代码的 Android App 和数据集。
+	2. 开源模型评价和 Plot 的 Python 代码。
+	3. 增加手持状态检测能力。
+	3. 增加对更多行为的识别能力。
+
+2017 年
+
+	1. 加入更多机器学习算法。
+	2. 移植 Tensorflow 的 CNN 实现到 Android 端。
 
 ## License
 
@@ -34,5 +56,3 @@ Android 平台实时用户行为识别 SDK
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-
-

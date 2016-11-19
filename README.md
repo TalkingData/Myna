@@ -23,7 +23,7 @@ Myna 使用随机森岭分类算法进行实时用户行为识别，内置了一
 
 ## 集成文档
 
-QuickStart.md
+[快速集成文档](/QuickStart.md)
 
 ## Roadmap
 

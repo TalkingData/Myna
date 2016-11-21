@@ -27,7 +27,7 @@ Google 将 Google Play Service 中和用户场景识别相关的服务和功能�
 
 我们可以通过 `com.google.android.gms.awareness.Awareness.SnapshotApi.getDetectedActivity` 方法获取最后一次获取到的用户行为。Myna 兼容 Awareness API，开发者可以在初始化的时候选择使用 Awareness API 或者 Myna 的识别算法，当 Myna 检测到当前运行的设备不支持 Google Play Service 的时候，会自动切换到 Myna 的识别算法。
 
-### 面向开发者的接口快读集成
+### 面向开发者的接口快速集成
 
 #### 初始化
 
@@ -170,43 +170,3 @@ Myna 支持同时配置多个识别器（MynaRecognizerInterface 派生类的实
     public static void cleanUp(Context ctx)
 
 清理环境后，再次启动 Myna 需要重新初始化。
-
-### 面向开发者的接口快读集成
-
-#### 初始化
-
-在应用自定义的 `Application` 派生类或者某个 `Activity` 的 `onCreate` 方法中调用下面的接口进行初始化：
-
-	@Override
-    public void onCreate() {
-        super.onCreate();
-        context = this;
-        MynaApi.init(this, new MyInitCallback(), new MyCallback(), MynaApi.TALKINGDATA);
-    }
-
-初始化的时候，需要传入一个实现了接口 `MynaInitCallbacks` 的类的实例作为回调，这样将可以在 Myna 初始化成功或者失败时做不同的处理。接口 `MynaInitCallbacks` 的定义为：
-
-	/**
- 	* Define callback methods to handle different initialization results.
- 	*/
-	public interface MynaInitCallbacks {
-
-	    /**
-	     * Called when Myna is successfully initialized.
-	     */
-	    void onSucceeded();
-	
-	    /**
-	     * Called when Myna failed to initialize.
-	     */
-	    void onFailed();	
-	}
-
-通过下面的接口可以获取 Myna 的初始化状态：
-
-	/**
-     * Get the status of Myna initialization
-     */
-    public static boolean isInitialized(){
-        return isInitialized;
-    }

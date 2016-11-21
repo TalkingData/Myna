@@ -2,7 +2,11 @@
 
 Android 平台场景识别框架
 
+[![GitHub license](http://og41w30k3.bkt.clouddn.com/apache2.svg)](./LICENSE)
+
+
 ![](http://p1.bqimg.com/562611/952bd822efce378b.png)
+ 
 
 Myna 项目中包含一个测试 Demo 工程：demo-myna, 将该工程和 Myna 项目本身导入到 Android Studio 中，就可以开始调试了。
 
@@ -23,7 +27,7 @@ Myna 使用随机森岭分类算法进行实时用户行为识别，内置了一
 
 ## 集成文档
 
-QuickStart.md
+[快速集成文档](/QuickStart.md)
 
 ## Roadmap
 

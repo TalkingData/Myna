@@ -21,7 +21,13 @@ Myna 提供了两套接口：
 2. In_Vehicle
 3. Still
 
-Myna 使用随机森岭分类算法进行实时用户行为识别，内置了一个已经训练好的模型文件，在运行时加载。模型的 ROC 为：
+Myna 使用随机森林分类算法的一种开源实现--**Dice** 进行的实时用户行为识别：
+
+- [Dice项目主页](http://www.dice4dm.com/)
+
+- [Dice文档](http://www.dice4dm.com/doc/index.html)
+
+Myna中内置了一个已经训练好的模型文件，在运行时加载。模型的 ROC 为：
 
 ![](http://p1.bqimg.com/562611/13d6243cab1e64d8.png)
 

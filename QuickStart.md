@@ -23,7 +23,7 @@ Myna 提供了两套接口：
 
 > A unified sensing platform enabling applications to be aware of multiple aspects of a users context, while managing battery and memory health.
 
-Google 将 Google Play Service 中和用户场景识别相关的服务和功能整合在一个统一的 API 下，为开发者从兼顾内存占用和电量消耗方面提供更高效率的方案。
+Google 将 Google Play Service 中和用户情景感知相关的服务和功能整合在一个统一的 API 下，为开发者从兼顾内存占用和电量消耗方面提供更高效率的方案。
 
 我们可以通过 `com.google.android.gms.awareness.Awareness.SnapshotApi.getDetectedActivity` 方法获取最后一次获取到的用户行为。Myna 兼容 Awareness API，开发者可以在初始化的时候选择使用 Awareness API 或者 Myna 的识别算法，当 Myna 检测到当前运行的设备不支持 Google Play Service 的时候，会自动切换到 Myna 的识别算法。
 

@@ -1,6 +1,6 @@
 # Myna
 
-Android 平台场景识别框架
+Android 平台情景感知框架
 
 [![GitHub license](http://og41w30k3.bkt.clouddn.com/apache2.svg)](./LICENSE)
 

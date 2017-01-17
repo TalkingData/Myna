@@ -1,6 +1,7 @@
 *.iml
 build/
-
+.gradle/
+.idea/
 
 #################
 ## Eclipse

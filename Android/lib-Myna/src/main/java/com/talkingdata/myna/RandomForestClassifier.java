@@ -1,7 +1,5 @@
 package com.talkingdata.myna;
 
-import android.content.Context;
-
 import com.talkingdata.myna.sensor.Feature;
 import com.talkingdata.myna.sensor.SensorData;
 import com.talkingdata.myna.sensor.SensorFeature;
@@ -19,7 +17,6 @@ import dice.tree.model.CBRRDTModel;
 import dice.tree.structure.Node;
 
 public class RandomForestClassifier implements ClassifierInterface {
-    private Context ctx;
 
     private int attrSize = 0;
     private int labelNum = 0;
@@ -28,8 +25,10 @@ public class RandomForestClassifier implements ClassifierInterface {
     private CBRRDTModel model;
     private int[] attributes = null;
 
-    public RandomForestClassifier(Context context) {
-        ctx = context;
+    public RandomForestClassifier(String trainedTrees) {
+        parseJsonObj(trainedTrees);
+        model = new CBRRDTModel();
+        model.init(trees, attributes, maxS);
     }
 
     /**
@@ -39,10 +38,6 @@ public class RandomForestClassifier implements ClassifierInterface {
      * @return Extracted features.
      */
     private double[][] prepareFeatures(SensorData[] sensorData) {
-        String trainedTrees = Utils.loadFeaturesFromAssets(ctx, "classificator.json");
-        parseJsonObj(trainedTrees);
-        model = new CBRRDTModel();
-        model.init(trees, attributes, maxS);
 
         double[][] matrix = new double[1][attrSize];
         matrix[0] = new double[attrSize];

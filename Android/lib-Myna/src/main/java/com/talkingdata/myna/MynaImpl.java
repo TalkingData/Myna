@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
+import com.talkingdata.myna.tools.Utils;
+
 import static android.content.Context.BIND_AUTO_CREATE;
 
 class MynaImpl implements MynaInterface {
@@ -83,7 +85,8 @@ class MynaImpl implements MynaInterface {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             myBinder = (MynaService.MyBinder) service;
-            RandomForestClassifier randomForestClassifier = new RandomForestClassifier(ctx);
+            String trainedTrees = Utils.loadFeaturesFromAssets(ctx, "classificator.json");
+            RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
             HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, resultCallback);
             humanActivityRecognizer.setSamplingPointCount(512);
             humanActivityRecognizer.setSamplingDuration(20);

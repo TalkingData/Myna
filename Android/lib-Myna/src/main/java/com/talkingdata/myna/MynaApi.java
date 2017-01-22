@@ -48,6 +48,12 @@ public class MynaApi {
         return MynaHelper.isInitialized();
     }
 
+    public static void train(MynaTrainTestCallback ttCallback, Context ctx){
+        MynaHelper.train(ttCallback, ctx);
+    }
 
+    public static void test(MynaTrainTestCallback ttCallback, Context ctx){
+        MynaHelper.test(ttCallback, ctx);
+    }
 
 }

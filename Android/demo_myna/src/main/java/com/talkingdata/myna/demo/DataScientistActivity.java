@@ -14,6 +14,7 @@ import com.talkingdata.myna.MynaResultCallback;
 import com.talkingdata.myna.RandomForestClassifier;
 import com.talkingdata.myna.RecognizedActivity;
 import com.talkingdata.myna.RecognizedActivityResult;
+import com.talkingdata.myna.tools.Utils;
 
 
 public class DataScientistActivity extends AppCompatActivity {
@@ -72,7 +73,8 @@ public class DataScientistActivity extends AppCompatActivity {
     }
 
     private void doAsDataScientist(){
-        RandomForestClassifier randomForestClassifier = new RandomForestClassifier(getApplicationContext());
+        String trainedTrees = Utils.loadFeaturesFromAssets(getApplicationContext(), "classificator.json");
+        RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
         HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, new MyCallback());
         humanActivityRecognizer.setSamplingPointCount(512);
         humanActivityRecognizer.setSamplingDuration(20);

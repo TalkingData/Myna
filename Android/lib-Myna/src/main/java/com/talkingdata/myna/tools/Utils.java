@@ -2,14 +2,22 @@ package com.talkingdata.myna.tools;
 
 import android.content.Context;
 import android.hardware.SensorManager;
+import android.os.Environment;
 import android.util.Base64;
+import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.talkingdata.myna.sensor.SensorData;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -91,5 +99,128 @@ public class Utils {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(ctx);
         return resultCode == ConnectionResult.SUCCESS;
+    }
+
+    public static void deleteFile(final String fileName){
+        File file = new File(Environment.getExternalStorageDirectory(), "/rHAR/" + fileName);
+        if(file.exists())
+        {
+            Log.i(TAG, String.valueOf(file.delete()));
+        }
+    }
+
+    public static SparseArray<File> getDataFiles(final String folderSubPath){
+        if(folderSubPath == null || folderSubPath.trim().isEmpty()){
+            return null;
+        }
+        SparseArray<File> files = new SparseArray<>();
+        File file = new File(Environment.getExternalStorageDirectory() + folderSubPath);
+        if(!file.exists() || !file.isDirectory())
+            return null;
+
+        File[] tempFiles = file.listFiles();
+        if(tempFiles == null)
+            return null;
+        int count = 0;
+        for(File tempFile : tempFiles){
+            if(!tempFile.isDirectory()){
+                files.append(count++, tempFile);
+            }
+        }
+        return files;
+    }
+
+    public static void saveAsAppend(final Context ctx, final String content, final String fileName) {
+        if(ctx == null || content.isEmpty() || fileName == null || fileName.isEmpty()){
+            return;
+        }
+        File dir = new File(Environment.getExternalStorageDirectory() + "/rHAR/");
+        if(!dir.exists()){
+            dir.mkdir();
+        }
+        File file = new File(dir, fileName);
+        Log.i(TAG, "Append saving, saved path: " + file.getAbsolutePath());
+        try {
+            FileWriter fWriter = new FileWriter(file, true);
+            BufferedWriter writer = new BufferedWriter(fWriter);
+            writer.write(content);
+            writer.close();
+            fWriter.close();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String save(final Context ctx, final String content, final String fileName, final int label) {
+        if(ctx == null || content.isEmpty() || fileName == null || fileName.isEmpty()){
+            return null;
+        }
+
+        File file = new File(ctx.getFilesDir(), fileName);
+        String sdState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(sdState)){
+            File dir = new File(Environment.getExternalStorageDirectory() + "/rHAR/");
+            if(label > 0){
+                dir = new File(Environment.getExternalStorageDirectory() + "/rHAR/data/" + String.valueOf(label));
+            }
+            if(!dir.exists()){
+                dir.mkdir();
+            }
+            file = new File(dir, fileName);
+        }
+        String savedPath = file.getAbsolutePath();
+        Log.i(TAG, "Save path: " + savedPath);
+        if (file.exists())
+            Log.i(TAG, "Existing file deleting result: "+ String.valueOf(file.delete()));
+        try {
+            FileWriter fWriter = new FileWriter(file);
+            BufferedWriter writer = new BufferedWriter(fWriter);
+            writer.write(content);
+            writer.close();
+            fWriter.close();
+            return savedPath;
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static boolean isFileExists(Context ctx, String fileName){
+        if(ctx == null ||  fileName == null || fileName.isEmpty()){
+            return false;
+        }
+        File file = new File(Environment.getExternalStorageDirectory() + "/rHAR/" + fileName);
+        return file.exists();
+    }
+
+    public static String load(Context ctx, String fileName) {
+        if(ctx == null ||  fileName == null || fileName.isEmpty()){
+            return null;
+        }
+        File file = new File(ctx.getFilesDir(), fileName);
+        String sdState = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(sdState)){
+            File dir = new File(Environment.getExternalStorageDirectory() + "/rHAR/");
+            if(!dir.exists()){
+                dir.mkdir();
+            }
+            file = new File(dir, fileName);
+        }
+        if (file.exists()) {
+            try {
+                StringBuilder text = new StringBuilder();
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    text.append(line);
+                    text.append('\n');
+                }
+                br.close();
+                return text.toString();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

@@ -7,7 +7,7 @@ import com.talkingdata.myna.tools.Utils;
 class MynaHelper {
 
     private static MynaInterface mynaImpl = null;
-    synchronized static MynaInterface prepareImpl(Context context, MynaInitCallback initCallback, MynaResultCallback resultCallback, int mode){
+    private synchronized static MynaInterface prepareImpl(Context context, MynaInitCallback initCallback, MynaResultCallback resultCallback, int mode){
         if(mynaImpl == null){
             synchronized (MynaInterface.class){
                 if(mynaImpl == null){
@@ -60,4 +60,13 @@ class MynaHelper {
         return mynaImpl.isInitialized();
     }
 
+    static void train(MynaTrainTestCallback ttCallback, Context ctx){
+        MynaTrainTest tt = new MynaTrainTest(ttCallback, ctx);
+        tt.startTrainingWithExistedData();
+    }
+
+    static void test(MynaTrainTestCallback ttCallback, Context ctx){
+        MynaTrainTest tt = new MynaTrainTest(ttCallback, ctx);
+        tt.startTestingWithExistedData();
+    }
 }

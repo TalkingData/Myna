@@ -6,7 +6,9 @@
 
 使用 `git` 命令或者熟悉的 `git` 客户端将 Myna 克隆到本地：
 
-	git clone https://github.com/TalkingData/Myna.git
+```st
+git clone https://github.com/TalkingData/Myna.git
+```
 
 ### Demo App
 
@@ -33,84 +35,101 @@ Google 将 Google Play Service 中和用户情景感知相关的服务和功能�
 
 在应用自定义的 `Application` 派生类或者某个 `Activity` 的 `onCreate` 方法中调用下面的接口进行初始化：
 
-	@Override
-    public void onCreate() {
-        super.onCreate();
-        context = this;
-        MynaApi.init(this, new MyInitCallback(), new MyCallback(), MynaApi.TALKINGDATA);
-    }
+```java
+@Override
+public void onCreate() {
+    super.onCreate();
+    context = this;
+    MynaApi.init(this, new MyInitCallback(), new MyCallback(), MynaApi.TALKINGDATA);
+}
+```
 
 初始化的时候，需要传入一个实现了接口 `MynaInitCallbacks` 的类的实例作为回调，这样将可以在 Myna 初始化成功或者失败时做不同的处理。接口 `MynaInitCallbacks` 的定义为：
 
-	/**
-	 * Define resultCallback methods to handle different initialization results.
-	 */
-	public interface MynaInitCallback {
-	
-	    /**
-	     * Called when Myna is successfully initialized.
-	     */
-	    void onSucceeded();
-	
-	    /**
-	     * Called when Myna failed to initialize.
-	     */
-	    void onFailed(MynaResult error);
-	}
+```java
+/**
+ * Define resultCallback methods to handle different initialization results.
+ */
+public interface MynaInitCallback {
 
+    /**
+     * Called when Myna is successfully initialized.
+     */
+    void onSucceeded();
+
+    /**
+     * Called when Myna failed to initialize.
+     */
+    void onFailed(MynaResult error);
+}
+```
 `MynaResultCallback` 用来返回识别结果：
-	
-	public interface MynaResultCallback<R extends MynaResultInterface> {
+
+```java	
+public interface MynaResultCallback<R extends MynaResultInterface> {
     void onResult(@NonNull R var1);
-	}
+}
+```
 
 通过下面的接口可以获取 Myna 的初始化状态：
 
-	/**
-     * Get the status of Myna initialization
-     */
-    public static boolean isInitialized()
+```java
+/**
+ * Get the status of Myna initialization
+ */
+public static boolean isInitialized()
+```
 
 #### 开始和停止
 
 初始化后，就可以调用 `start` 和 `stop` 接口接收和停止识别算法的运行并获得识别结果。
 
-    /**
-     * Stop all background tasks
-     */
-    public static void stop(){
-        MynaHelper.stop();
-    }
+```java
+/**
+ * Stop all background tasks
+ */
+public static void stop(){
+    MynaHelper.stop();
+}
 
-    /**
-     * Start to recognize
-     */
-    public static void start(){
-        MynaHelper.start();
-    }
+/**
+ * Start to recognize
+ */
+public static void start(){
+    MynaHelper.start();
+}
+```
 
 ### 使用 Google Awareness API
 
 如果希望使用 Google Awareness API 提供的实时行为识别能力，在初始化时：
 
-	MynaApi.init(this, new MyInitCallback(), new MyCallback(), MynaApi.GOOGLE);
+```java
+MynaApi.init(this, new MyInitCallback(), new MyCallback(), MynaApi.GOOGLE);
+```
 
 需要注意的是，这是还需要额外进行下面的配置：
 
 - 参考 [Android 开发者需要知道的 Google Awareness API](http://mp.weixin.qq.com/s?__biz=MjM5NzQ3NDg0Mg==&mid=2653096725&idx=1&sn=f6686df351aabe957a450c2fa1b01596&mpshare=1&scene=1&srcid=10311xdjSUJveY5gTtuLLQw2#rd) 文章申请 App key 并创建用于自己应用的 Credential。
 - 在 `AndroidManifest.xml` 的 `application` 块中添加下面的声明：
 
-		<meta-data
-            android:name="com.google.android.awareness.API_KEY"
-            android:value="申请的 App Key"/>
-		
+```xml
+	<meta-data
+        android:name="com.google.android.awareness.API_KEY"
+        android:value="申请的 App Key"/>
+```
+
 - 添加下面的 Permission：
 
-		<uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+```xml
+	<uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+```
 
 - 在应用 module 的 `build.gradle` 文件中，添加下面的依赖：
 
-		compile 'com.google.android.gms:play-services-awareness:9.8.0'
+```st
+	compile 'com.google.android.gms:play-services-awareness:9.8.0'
+```
 
 ### 面向数据科学家的接口
 
@@ -120,53 +139,65 @@ Google 将 Google Play Service 中和用户情景感知相关的服务和功能�
 
 #### 添加新的传感器类型订阅：
 
-	/**
-     * Add a sensor into the chosen sensor list.
-     * @param sensorType sensorType
-     */
-    public synchronized void addSensorType(int sensorType)
+```java
+/**
+ * Add a sensor into the chosen sensor list.
+ * @param sensorType sensorType
+ */
+public synchronized void addSensorType(int sensorType)
+```
 
 #### 移除已经订阅的传感器类型：
 
-	/**
-     * Remove a sensor from the chosen sensor list.
-     * @param sensorType The type of the sensor to be removed.
-     */
-    public synchronized void removeSensorType(int sensorType)
+```java
+/**
+ * Remove a sensor from the chosen sensor list.
+ * @param sensorType The type of the sensor to be removed.
+ */
+public synchronized void removeSensorType(int sensorType)
+```
 
 #### 设置采样的间隔时间（反映采样频率，单位毫秒）：
 
-	/**
-     * Set sampling duration.
-     * @param duration Sampling duration
-     */
-    public void setSamplingDuration(int duration)
+```java
+/**
+ * Set sampling duration.
+ * @param duration Sampling duration
+ */
+public void setSamplingDuration(int duration)
+```
 
 ##### 设置 batch size：
 
-	/**
-     * Set total count of the data points for each recognition.
-     * @param pointCount Total count of the data points.
-     */
-    public void setSamplingPointCount
+```java
+/**
+ * Set total count of the data points for each recognition.
+ * @param pointCount Total count of the data points.
+ */
+public void setSamplingPointCount
+```
 
 Myna 支持同时配置多个识别器（MynaRecognizerInterface 派生类的实例），也就是 `Recognizer`，而且，在运行时，可以随时移除已经添加的某个 recognizer config：
 
-	/**
-     * Add a new recognition configuration to be executed later
-     */
-    public static void addRecognizer(MynaRecognizerInterface recognizer)
+```java
+/**
+ * Add a new recognition configuration to be executed later
+ */
+public static void addRecognizer(MynaRecognizerInterface recognizer)
 
-	/**
-     * Remove a new recognition configuration to be executed later
-     */
-    public static void removeRecognizer(int configId)
+/**
+ * Remove a new recognition configuration to be executed later
+ */
+public static void removeRecognizer(int configId)
+```
 
 如果想完全重置 Myna 运行环境，需要运行：
 
-	/**
-     * Clean Myna env
-     */
-    public static void cleanUp(Context ctx)
+```java
+/**
+ * Clean Myna env
+ */
+public static void cleanUp(Context ctx)
+```
 
 清理环境后，再次启动 Myna 需要重新初始化。

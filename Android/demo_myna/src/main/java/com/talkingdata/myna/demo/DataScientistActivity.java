@@ -14,22 +14,23 @@ import com.talkingdata.myna.MynaResultCallback;
 import com.talkingdata.myna.RandomForestClassifier;
 import com.talkingdata.myna.RecognizedActivity;
 import com.talkingdata.myna.RecognizedActivityResult;
+import com.talkingdata.myna.XGBoostClassifier;
 import com.talkingdata.myna.tools.Utils;
 
 
 public class DataScientistActivity extends AppCompatActivity {
 
-
+    private boolean isInitialized = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        DataScientistAPI.init(this, new MyInitCallback());
+        DataScientistAPI.init(this, new MyInitCallback(), new MyCallback());
     }
 
     @Override
     protected void onPause() {
-        if(DataScientistAPI.isInitialized()){
+        if(isInitialized){
             DataScientistAPI.stop();
         }
         super.onPause();
@@ -38,26 +39,28 @@ public class DataScientistActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(DataScientistAPI.isInitialized()){
+        if(isInitialized){
             DataScientistAPI.start();
         }
     }
 
-    class MyInitCallback implements MynaInitCallback {
+    private class MyInitCallback implements MynaInitCallback {
 
         @Override
         public void onSucceeded() {
             Toast.makeText(getApplicationContext(), "Myna initialization Succeeded!", Toast.LENGTH_LONG).show();
+            isInitialized = true;
             doAsDataScientist();
         }
 
         @Override
         public void onFailed(MynaResult error) {
             Toast.makeText(getApplicationContext(), "Myna initialization failed!", Toast.LENGTH_LONG).show();
+            isInitialized = false;
         }
     }
 
-    class MyCallback implements MynaResultCallback<RecognizedActivityResult> {
+    private class MyCallback implements MynaResultCallback<RecognizedActivityResult> {
 
         @Override
         public void onResult(@NonNull RecognizedActivityResult detectedResults) {
@@ -73,11 +76,24 @@ public class DataScientistActivity extends AppCompatActivity {
     }
 
     private void doAsDataScientist(){
+        xgBoost();
+    }
+
+    private void randomForest(){
         String trainedTrees = Utils.loadFeaturesFromAssets(getApplicationContext(), "classificator.json");
         RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
         HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, new MyCallback());
         humanActivityRecognizer.setSamplingPointCount(512);
         humanActivityRecognizer.setSamplingDuration(20);
+        DataScientistAPI.addRecognizer(humanActivityRecognizer);
+        DataScientistAPI.start();
+    }
+
+    private void xgBoost(){
+        XGBoostClassifier xgBoostClassifier = new XGBoostClassifier(this.getApplicationContext());
+        HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(xgBoostClassifier, new MyCallback());
+        humanActivityRecognizer.setSamplingPointCount(128);
+        humanActivityRecognizer.setSamplingDuration(50);
         DataScientistAPI.addRecognizer(humanActivityRecognizer);
         DataScientistAPI.start();
     }

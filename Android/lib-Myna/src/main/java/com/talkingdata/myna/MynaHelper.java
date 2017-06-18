@@ -7,14 +7,19 @@ import com.talkingdata.myna.tools.Utils;
 class MynaHelper {
 
     private static MynaInterface mynaImpl = null;
-    private synchronized static MynaInterface prepareImpl(Context context, MynaInitCallback initCallback, MynaResultCallback resultCallback, int mode){
+    private synchronized static MynaInterface prepareImpl(Context context,
+                                                          MynaInitCallback initCallback,
+                                                          MynaResultCallback resultCallback,
+                                                          int mode,
+                                                          boolean keepDefaultRecognizer){
         if(mynaImpl == null){
             synchronized (MynaInterface.class){
                 if(mynaImpl == null){
                     if(mode == MynaApi.GOOGLE && Utils.isGooglePlayServiceSupported(context)){
                         mynaImpl = new AwarenessImpl(initCallback, resultCallback);
                     }else{
-                        mynaImpl = new MynaImpl(initCallback, resultCallback);
+                        mynaImpl = new MynaImpl(initCallback, resultCallback, keepDefaultRecognizer);
+
                     }
                 }
             }
@@ -34,7 +39,13 @@ class MynaHelper {
      */
     static void init(Context context, MynaInitCallback initCallback, MynaResultCallback resultCallback, int mode){
         if(context != null){
-            prepareImpl(context, initCallback, resultCallback, mode);
+            init(context, initCallback, resultCallback, mode, true);
+        }
+    }
+
+    static void init(Context context, MynaInitCallback initCallback, MynaResultCallback resultCallback, int mode, boolean keepDefaultRecognizer){
+        if(context != null){
+            prepareImpl(context, initCallback, resultCallback, mode, keepDefaultRecognizer);
         }
     }
 
@@ -52,6 +63,20 @@ class MynaHelper {
         mynaImpl.stop();
     }
 
+    /**
+     * Add a new recognition configuration to be executed later
+     */
+    static void addRecognizer(MynaRecognizerAbstractClass recognizer){
+        mynaImpl.addRecognizer(recognizer);
+    }
+
+    /**
+     * Remove a new recognition configuration to be executed later
+     */
+    static void removeRecognizer(int configId){
+        mynaImpl.removeRecognizer(configId);
+    }
+
 
     /**
      * Get the status of Myna initialization
@@ -65,8 +90,8 @@ class MynaHelper {
         tt.startTrainingWithExistedData();
     }
 
-    static void test(MynaTrainTestCallback ttCallback, Context ctx){
+    static void test(MynaTrainTestCallback ttCallback, Context ctx, String classifierType){
         MynaTrainTest tt = new MynaTrainTest(ttCallback, ctx);
-        tt.startTestingWithExistedData();
+        tt.startTestingWithExistedData(classifierType);
     }
 }

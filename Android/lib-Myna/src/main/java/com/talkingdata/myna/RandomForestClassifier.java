@@ -24,6 +24,9 @@ public class RandomForestClassifier implements ClassifierInterface {
     private Node[] trees = null;
     private CBRRDTModel model;
     private int[] attributes = null;
+    private double[] features;
+
+    public static final String TYPE = "randomForest";
 
     public RandomForestClassifier(String trainedTrees) {
         parseJsonObj(trainedTrees);
@@ -37,14 +40,14 @@ public class RandomForestClassifier implements ClassifierInterface {
      * @param sensorData Raw sensor data points.
      * @return Extracted features.
      */
-    private double[][] prepareFeatures(SensorData[] sensorData) {
+    private double[][] prepareFeatures(SensorData[] sensorData, final int sampleFreq, final int sampleCount) {
 
         double[][] matrix = new double[1][attrSize];
         matrix[0] = new double[attrSize];
         Feature aFeature = new Feature();
-        aFeature.extractFeatures(sensorData);
-        int pos = 0;
-        pos = get1AxisData(matrix, aFeature.getSelectedFeatures(), pos);
+        aFeature.extractFeatures(sensorData, sampleFreq, sampleCount);
+        System.arraycopy(aFeature.getFeaturesAsArray(), 0, matrix[0], 0, SensorFeature.FEATURE_COUNT);
+        int pos = SensorFeature.FEATURE_COUNT;
         if(pos == attrSize - labelNum)
         {
             addLabelData(matrix, pos);
@@ -54,14 +57,22 @@ public class RandomForestClassifier implements ClassifierInterface {
         }
     }
 
+    @Override
+    public double[] getCurrentFeatures(){
+        return features;
+    }
+
     /**
      * Recognize current human activity based on pre-defined rules.
      * @param sensorData Raw sensor data points.
      */
     @Override
-    public double[] recognize(SensorData[] sensorData) {
-        double[][] features = prepareFeatures(sensorData);
-        Instances testInstances =  new SimpleInstances(attributes, features, null, "humanActivityRecognition");
+    public double[] recognize(SensorData[] sensorData, final int sampleFreq, final int sampleCount) {
+        double[][] matrix = prepareFeatures(sensorData, sampleFreq, sampleCount);
+        if(matrix != null && matrix.length >= 1){
+            features = matrix[0];
+        }
+        Instances testInstances =  new SimpleInstances(attributes, matrix, null, "humanActivityRecognition");
         return predict(testInstances);
     }
 
@@ -125,50 +136,6 @@ public class RandomForestClassifier implements ClassifierInterface {
             }
         }
         return confidences;
-    }
-
-    private int get1AxisData(double[][] matrix, SensorFeature sf, int currentPos){
-        int index = currentPos;
-        matrix[0][index++] = sf.minx;
-        matrix[0][index++] = sf.miny;
-        matrix[0][index++] = sf.minz;
-        matrix[0][index++] = sf.maxx;
-        matrix[0][index++] = sf.maxy;
-        matrix[0][index++] = sf.maxz;
-        matrix[0][index++] = sf.avgx;
-        matrix[0][index++] = sf.avgy;
-        matrix[0][index++] = sf.avgz;
-        matrix[0][index++] = sf.varx;
-        matrix[0][index++] = sf.vary;
-        matrix[0][index++] = sf.varz;
-        matrix[0][index++] = sf.rangex;
-        matrix[0][index++] = sf.rangey;
-        matrix[0][index++] = sf.rangez;
-        matrix[0][index++] = sf.jumpx;
-        matrix[0][index++] = sf.jumpy;
-        matrix[0][index++] = sf.jumpz;
-        matrix[0][index++] = sf.fallx;
-        matrix[0][index++] = sf.fally;
-        matrix[0][index++] = sf.fallz;
-        matrix[0][index++] = sf.amp1x;
-        matrix[0][index++] = sf.amp1y;
-        matrix[0][index++] = sf.amp1z;
-        matrix[0][index++] = sf.amp2x;
-        matrix[0][index++] = sf.amp2y;
-        matrix[0][index++] = sf.amp2z;
-        matrix[0][index++] = sf.amp3x;
-        matrix[0][index++] = sf.amp3y;
-        matrix[0][index++] = sf.amp3z;
-        matrix[0][index++] = sf.freq1x;
-        matrix[0][index++] = sf.freq1y;
-        matrix[0][index++] = sf.freq1z;
-        matrix[0][index++] = sf.freq2x;
-        matrix[0][index++] = sf.freq2y;
-        matrix[0][index++] = sf.freq2z;
-        matrix[0][index++] = sf.freq3x;
-        matrix[0][index++] = sf.freq3y;
-        matrix[0][index++] = sf.freq3z;
-        return index;
     }
 
     private void addLabelData(double[][] matrix, int currentPos){

@@ -20,5 +20,5 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    provided 'com.google.android.gms:play-services-awareness:10.2.6'
+    provided 'com.google.android.gms:play-services-awareness:11.0.0'
 }

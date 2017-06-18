@@ -196,7 +196,9 @@ public class MynaService extends Service implements SensorEventListener {
                                 recognizer.recognitionHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        recognizer.onResult(recognizer.classifier.recognize(recognizer.dataSet));
+                                        recognizer.onResult(recognizer.classifier.recognize(recognizer.dataSet,
+                                                1000 / recognizer.getSamplingDuration(),
+                                                recognizer.getSamplingPointCount()));
                                     }
                                 });
                             } catch (Throwable t) {

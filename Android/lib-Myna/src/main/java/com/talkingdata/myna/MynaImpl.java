@@ -18,10 +18,12 @@ class MynaImpl implements MynaInterface {
     private MynaInitCallback initCallback;
     private MynaResultCallback resultCallback;
     private Context ctx;
+    private boolean keepDefaultRecognizer = true;
 
-    MynaImpl(MynaInitCallback callback, MynaResultCallback resultCallback){
+    MynaImpl(MynaInitCallback callback, MynaResultCallback resultCallback, boolean isKeep){
         this.initCallback = callback;
         this.resultCallback = resultCallback;
+        this.keepDefaultRecognizer = isKeep;
     }
 
     /**
@@ -66,6 +68,22 @@ class MynaImpl implements MynaInterface {
         ctx.unbindService(connection);
     }
 
+    /**
+     * Add a new recognition configuration to be executed later
+     */
+    @Override
+    public void addRecognizer(MynaRecognizerAbstractClass recognizer){
+        myBinder.addRecognizer(recognizer);
+    }
+
+    /**
+     * Remove a new recognition configuration to be executed later
+     */
+    @Override
+    public void removeRecognizer(int configId){
+        myBinder.removeRecognizer(configId);
+    }
+
 
     /**
      * Get the status of Myna initialization
@@ -85,12 +103,14 @@ class MynaImpl implements MynaInterface {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             myBinder = (MynaService.MyBinder) service;
-            String trainedTrees = Utils.loadFeaturesFromAssets(ctx, "classificator.json");
-            RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
-            HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, resultCallback);
-            humanActivityRecognizer.setSamplingPointCount(512);
-            humanActivityRecognizer.setSamplingDuration(20);
-            myBinder.addRecognizer(humanActivityRecognizer);
+            if(keepDefaultRecognizer){
+                String trainedTrees = Utils.loadFeaturesFromAssets(ctx, "classificator.json");
+                RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
+                HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, resultCallback);
+                humanActivityRecognizer.setSamplingPointCount(512);
+                humanActivityRecognizer.setSamplingDuration(20);
+                myBinder.addRecognizer(humanActivityRecognizer);
+            }
             initCallback.onSucceeded();
             isInitialized = true;
         }

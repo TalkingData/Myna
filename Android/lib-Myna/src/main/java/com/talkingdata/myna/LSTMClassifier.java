@@ -51,12 +51,16 @@ public class LSTMClassifier implements ClassifierInterface {
     @Override
     public double[] recognize(SensorData[] sensorData, final int sampleFreq, final int sampleCount) {
         float[] input = prepareFeatures(sensorData, sampleCount);
-        double[] result = new double[OUTPUT_SIZE];
+        float[] result = new float[OUTPUT_SIZE];
 
         inferenceInterface.feed(INPUT_NODE,input,INPUT_SIZE);
         inferenceInterface.run(OUTPUT_NODES);
         inferenceInterface.fetch(OUTPUT_NODE,result);
-        return result;
+        double[] doubleResult = new double[OUTPUT_SIZE];
+        for(int i = 0; i < OUTPUT_SIZE; ++i){
+            doubleResult[i] = (double)result[i];
+        }
+        return doubleResult;
     }
 
     @Override

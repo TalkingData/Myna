@@ -38,7 +38,7 @@ class MynaTrainTest {
     private SparseArray<Feature> rfFeatures = new SparseArray<>();
     private SparseIntArray rfLabels = new SparseIntArray();
     private SensorData[] periodVal;
-    private final int FEATURE_DATA_BATCH_SIZE = 128;
+    private int FEATURE_DATA_BATCH_SIZE = 128;
     private final String ARF_FILE_NAME = "train.arff";
 
     private final int SAMPLE_FREQUENCY = 20;
@@ -317,7 +317,7 @@ class MynaTrainTest {
                 generateXGBoostClassifier();
                 break;
             case LSTMClassifier.TYPE:
-                generateXGBoostClassifier();
+                generateLSTMClassifier();
                 break;
             default:
                 ttcallback.onFinalReport("Unsupported classifier type!", 0);
@@ -378,6 +378,10 @@ class MynaTrainTest {
         classifier = new XGBoostClassifier(context);
     }
 
+    private void generateLSTMClassifier() {
+        classifier = new LSTMClassifier(context);
+    }
+
     private void handleTestingProgress(double[] probabilities, int label, String featureName){
         RecognizedActivityResult result = new RecognizedActivityResult();
         result.activities = new RecognizedActivity[labels.length];
@@ -386,15 +390,17 @@ class MynaTrainTest {
 
         }
         double[] features = classifier.getCurrentFeatures();
-        StringBuilder sb = new StringBuilder();
-        for(double f: features){
-            sb.append((float)f);
+        if(features != null){
+            StringBuilder sb = new StringBuilder();
+            for(double f: features){
+                sb.append((float)f);
+                sb.append(",");
+            }
             sb.append(",");
+            sb.append(String.valueOf(label));
+            sb.append("\n");
+            Utils.saveAsAppend(context, sb.toString(), featureName);
         }
-        sb.append(",");
-        sb.append(String.valueOf(label));
-        sb.append("\n");
-        Utils.saveAsAppend(context, sb.toString(), featureName);
         ttcallback.onTestingResult(result, label);
     }
 }

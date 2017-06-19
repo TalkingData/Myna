@@ -316,6 +316,9 @@ class MynaTrainTest {
             case XGBoostClassifier.TYPE:
                 generateXGBoostClassifier();
                 break;
+            case LSTMClassifier.TYPE:
+                generateXGBoostClassifier();
+                break;
             default:
                 ttcallback.onFinalReport("Unsupported classifier type!", 0);
                 return;

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.talkingdata.myna.LSTMClassifier;
 import com.talkingdata.myna.MynaApi;
 import com.talkingdata.myna.MynaTrainTestCallback;
 import com.talkingdata.myna.RandomForestClassifier;
@@ -29,10 +30,12 @@ public class TrainActivity extends AppCompatActivity {
     private final int RF_TRAINING = 0;
     private final int RF_TESTING = 1;
     private final int XGBOOST_TESTING = 2;
+    private final int LSTM_TESTING = 3;
 
     private Button bt_rf_training;
     private Button bt_rf_testing;
     private Button bt_xgboost_testing;
+    private Button bt_lstm_testing;
     private TextView trainingView;
 
     @Override
@@ -42,6 +45,7 @@ public class TrainActivity extends AppCompatActivity {
         bt_rf_training = (Button) findViewById(R.id.bt_rf_training);
         bt_rf_testing = (Button) findViewById(R.id.bt_rf_testing);
         bt_xgboost_testing = (Button) findViewById(R.id.bt_xgboost_testing);
+        bt_lstm_testing = (Button) findViewById(R.id.bt_lstm_testing);
         trainingView = (TextView)findViewById(R.id.tv_result);
         HandlerThread ht = new HandlerThread("ht");
         ht.start();
@@ -59,6 +63,9 @@ public class TrainActivity extends AppCompatActivity {
                     case XGBOOST_TESTING:
                         resetTestingResults();
                         MynaApi.test(new MyTrainTestImpl(), getApplicationContext(), XGBoostClassifier.TYPE);
+                    case LSTM_TESTING:
+                        resetTestingResults();
+                        MynaApi.test(new MyTrainTestImpl(), getApplicationContext(), LSTMClassifier.TYPE);
                         break;
                     default:
                         break;
@@ -89,6 +96,14 @@ public class TrainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 disableButtons();
                 handler.sendEmptyMessage(XGBOOST_TESTING);
+            }
+        });
+
+        bt_lstm_testing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                disableButtons();
+                handler.sendEmptyMessage(LSTM_TESTING);
             }
         });
     }

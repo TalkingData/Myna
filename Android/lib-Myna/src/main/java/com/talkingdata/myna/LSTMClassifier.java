@@ -36,9 +36,9 @@ public class LSTMClassifier implements ClassifierInterface {
         float[] input = new float[INPUT_SIZE];
         if(sData.length == sampleCount){
             for(int i = 0; i < sData.length; ++i){
-                input[i] = sData[i].world_accelerometer[0];
-                input[sampleCount + i] = sData[i].world_accelerometer[1];
-                input[2 * sampleCount + i] = sData[i].world_accelerometer[2];
+                input[3 * i] = sData[i].world_accelerometer[0];
+                input[3 * i + 1] = sData[i].world_accelerometer[1];
+                input[3 * i + 2] = sData[i].world_accelerometer[2];
             }
         }
         return input;

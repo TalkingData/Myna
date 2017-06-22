@@ -10,7 +10,7 @@
 
 ### Data Structure
 
-数据集中包含下面三种行为的传感器数据：
+数据集中包含下面五种行为的传感器数据：
 
 - Walking
 - Running

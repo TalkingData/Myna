@@ -69,9 +69,6 @@ def save_utf8(file_path, content, para_mode="wb"):
     """
     save the given content to the given path
     """
-    """
-    save the given content to the given path
-    """
     with open(file_path, para_mode) as log:
         log.write(content)
 
@@ -382,9 +379,9 @@ def get_activity_str(act_id):
         return "Running"
     elif act_id == 2:
         return "Bus"
-    elif act_id == 2:
+    elif act_id == 3:
         return "Subway"
-    elif act_id == 2:
+    elif act_id == 4:
         return "Car"
     return "Unknown"
 

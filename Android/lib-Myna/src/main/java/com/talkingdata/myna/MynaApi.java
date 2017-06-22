@@ -52,8 +52,8 @@ public class MynaApi {
         MynaHelper.train(ttCallback, ctx);
     }
 
-    public static void test(MynaTrainTestCallback ttCallback, Context ctx){
-        MynaHelper.test(ttCallback, ctx);
+    public static void test(MynaTrainTestCallback ttCallback, Context ctx, String classifierType){
+        MynaHelper.test(ttCallback, ctx, classifierType);
     }
 
 }

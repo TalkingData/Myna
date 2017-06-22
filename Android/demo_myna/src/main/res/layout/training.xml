@@ -4,18 +4,33 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/bt_start_training"
+        android:id="@+id/bt_rf_training"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start training"
+        android:text="RandomForest training"
         android:textAllCaps="false" />
 
     <Button
-        android:id="@+id/bt_start_testing"
+        android:id="@+id/bt_rf_testing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start testing"
+        android:text="RandomForest inference"
         android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/bt_xgboost_testing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="XGBoost inference"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/bt_lstm_testing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LSTM inference"
+        android:textAllCaps="false" />
+
 
     <ScrollView
         android:layout_width="match_parent"

@@ -8,42 +8,57 @@ public class RecognizedActivity {
     /**
      * In_Vehicle
      */
-    private final static int In_Vehicle = 0;
+    public final static int In_Vehicle = 0;
 
     /**
      * Biking
      */
-    private final static int ON_BICYCLE = 1;
+    public final static int ON_BICYCLE = 1;
 
     /**
      * On_Foot
      */
-    private final static int ON_FOOT = 2;
+    public final static int ON_FOOT = 2;
 
     /**
      * Still
      */
-    private final static int STILL = 3;
+    public final static int STILL = 3;
 
     /**
      * Unknown
      */
-    private final static int UNKNOWN = 4;
+    public final static int UNKNOWN = 4;
 
     /**
      * Tilting
      */
-    private final static int TILTING = 5;
+    public final static int TILTING = 5;
 
     /**
      * Walking
      */
-    private final static int WALKING = 7;
+    public final static int WALKING = 7;
 
     /**
      * Running
      */
-    private final static int RUNNING = 8;
+    public final static int RUNNING = 8;
+
+    /**
+     * By bus
+     */
+    public final static int BUS = 101;
+
+    /**
+     * By Subway
+     */
+    public final static int SUBWAY = 102;
+
+    /**
+     * By car
+     */
+    public final static int CAR = 103;
 
     /**
      * Real time human activity type
@@ -74,10 +89,14 @@ public class RecognizedActivity {
 
     @Override
     public String toString(){
-        return String.format(Locale.CHINESE, "%s : %s", getActivityNameByType(activityType), String.valueOf(possibility));
+        return String.format(Locale.CHINESE, "%s : %s", RecognizedActivity.getActivityNameByType(activityType), String.valueOf(possibility));
     }
 
-    private String getActivityNameByType(int type){
+    public static String getActivityName(final int actType){
+        return getActivityNameByType(actType);
+    }
+
+    private static String getActivityNameByType(final int type){
 
         String result = "UNKNOWN";
         switch (type){
@@ -101,6 +120,15 @@ public class RecognizedActivity {
                 break;
             case 8:
                 result = "RUNNING";
+                break;
+            case 101:
+                result = "BUS";
+                break;
+            case 102:
+                result = "SUBWAY";
+                break;
+            case 103:
+                result = "CAR";
                 break;
             default:
                 break;

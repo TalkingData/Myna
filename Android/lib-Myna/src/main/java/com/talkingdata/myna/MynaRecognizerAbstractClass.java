@@ -54,8 +54,8 @@ abstract class MynaRecognizerAbstractClass {
      */
     MynaRecognizerAbstractClass(ClassifierInterface classifier, MynaResultCallback resultCallback){
         chosenSensors = new SparseIntArray();
-        samplingDuration = 20;
-        samplingPointCount = 256;
+        samplingDuration = 50;
+        samplingPointCount = 90;
         dataSetIndex = 0;
         this.classifier = classifier;
         this.resultCallback = resultCallback;

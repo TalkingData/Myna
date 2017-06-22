@@ -87,6 +87,20 @@ class AwarenessImpl implements MynaInterface, ConnectionCallbacks, OnConnectionF
     }
 
     /**
+     * Add a new recognition configuration to be executed later
+     */
+    @Override
+    public void addRecognizer(MynaRecognizerAbstractClass recognizer){
+    }
+
+    /**
+     * Remove a new recognition configuration to be executed later
+     */
+    @Override
+    public void removeRecognizer(int configId){
+    }
+
+    /**
      * Runs when a GoogleApiClient object successfully connects.
      */
     @Override

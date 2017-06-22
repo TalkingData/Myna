@@ -21,6 +21,16 @@ interface MynaInterface {
     void stop();
 
     /**
+     * Add a new recognition configuration to be executed later
+     */
+    void addRecognizer(MynaRecognizerAbstractClass recognizer);
+
+    /**
+     * Remove a new recognition configuration to be executed later
+     */
+    void removeRecognizer(int configId);
+
+    /**
      * Get the status of Myna initialization
      */
     boolean isInitialized();

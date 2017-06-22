@@ -15,7 +15,12 @@ public class HumanActivityRecognizer extends MynaRecognizerAbstractClass {
     @Override
     void onResult(double[] confidences){
         RecognizedActivityResult result = new RecognizedActivityResult();
-        int[] labels = {2, 0, 3};
+        int[] labels = {
+                RecognizedActivity.WALKING,
+                RecognizedActivity.RUNNING,
+                RecognizedActivity.BUS,
+                RecognizedActivity.SUBWAY,
+                RecognizedActivity.CAR};
         result.activities = new RecognizedActivity[labels.length];
         for(int index = 0; index < labels.length; ++index){
             result.activities[index] = new RecognizedActivity(labels[index], confidences[index]);

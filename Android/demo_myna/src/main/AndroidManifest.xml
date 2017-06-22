@@ -27,7 +27,7 @@
             android:name="com.google.android.awareness.API_KEY"
             android:value="AIzaSyBYZwuSI2KENBA-9A45vwz2QFl8SMiUS68" />
 
-        <activity android:name=".TrainActivity"></activity>
+        <activity android:name=".TrainActivity" />
     </application>
 
 </manifest>

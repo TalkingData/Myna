@@ -23,25 +23,35 @@ import java.util.Locale;
 import dice.data.Instances;
 import dice.data.io.ArffReader;
 import dice.tree.builder.TreeBuilder;
-import dice.tree.model.CBRRDTModel;
 import dice.tree.structure.Node;
 
 class MynaTrainTest {
     private MynaTrainTestCallback ttcallback;
     private Context context;
-    private CBRRDTModel model;
-    private int attrSize = 42;
-    private int labelNum = 3;
+    private int attrSize = 29;
+    private int labelNum = 5;
     private int maxS = 10;
     private int treeNum = 3;
-    private int maxTreeDepth = 21;
+    private int maxTreeDepth = 14;
     private Node[] trees = new Node[treeNum];
 
     private SparseArray<Feature> rfFeatures = new SparseArray<>();
     private SparseIntArray rfLabels = new SparseIntArray();
     private SensorData[] periodVal;
-    private final int FEATURE_DATA_BATCH_SIZE = 512;
+    private int FEATURE_DATA_BATCH_SIZE = 128;
     private final String ARF_FILE_NAME = "train.arff";
+
+    private final int SAMPLE_FREQUENCY = 20;
+
+    private ClassifierInterface classifier;
+
+    private int[] labels = {
+            RecognizedActivity.WALKING,
+            RecognizedActivity.RUNNING,
+            RecognizedActivity.BUS,
+            RecognizedActivity.SUBWAY,
+            RecognizedActivity.CAR};
+
 
     MynaTrainTest(MynaTrainTestCallback callback, Context ctx) {
         context = ctx;
@@ -53,18 +63,13 @@ class MynaTrainTest {
         Utils.deleteFile("train.arff");
         Utils.deleteFile("classificator.json");
 
-        ttcallback.onTrainingProgress("Training Walking...");
-        Log.i(Utils.TAG, "Training Walking...");
-        startTrainingWithExistedDataFromCSV(1);
-        ttcallback.onTrainingProgress("Training In_vehicle...");
-        Log.i(Utils.TAG, "Training In_vehicle...");
-        startTrainingWithExistedDataFromCSV(4);
-        ttcallback.onTrainingProgress("Training Still...");
-        Log.i(Utils.TAG, "Training Still...");
-        startTrainingWithExistedDataFromCSV(7);
+        ttcallback.onTrainingProgress("Preparing data...");
+        prepareDataForTraining();
 
         ttcallback.onTrainingProgress("Creating new train.arff file...");
         createTrainingDataset(rfFeatures, rfLabels);
+
+        ttcallback.onTrainingProgress("Starting training...");
         String modelPath = doTraining();
 
         if(modelPath != null && !modelPath.isEmpty()){
@@ -99,9 +104,6 @@ class MynaTrainTest {
         }else{
             return null;
         }
-
-//        model = new CBRRDTModel();
-//        model.init(trees, trainInstances.getAttributes(), maxS);
     }
 
     private String getModelAsString(int[] attributes) {
@@ -112,7 +114,7 @@ class MynaTrainTest {
             jsonObj.put("maxS", String.valueOf(this.maxS));
             jsonObj.put("treeNum", String.valueOf(this.treeNum));
             jsonObj.put("maxTreeDepth", String.valueOf(this.maxTreeDepth));
-            jsonObj.put("attributes", Arrays.toString(attributes).replace("[", "").replace("】", ""));
+            jsonObj.put("attributes", Arrays.toString(attributes).replace("[", "").replace("]", ""));
             jsonObj.put("trees", getTreeJsonArray());
             return jsonObj.toString();
 
@@ -126,9 +128,9 @@ class MynaTrainTest {
         try {
             JSONArray jsonArray = new JSONArray();
             JSONObject jo;
-            for (int i = 0; i < trees.length; i++) {
+            for (Node tree : trees) {
                 jo = new JSONObject();
-                jo.put("tree", Utils.toString(trees[i]));
+                jo.put("tree", Utils.toString(tree));
                 jsonArray.put(jo);
             }
             return jsonArray;
@@ -139,46 +141,52 @@ class MynaTrainTest {
         }
     }
 
-    private void startTrainingWithExistedDataFromCSV(final int label) {
-        SparseArray<File> files = Utils.getDataFiles("/rHAR/data/" + String.valueOf(label));
-        if (files == null)
+    private void prepareDataForTraining() {
+        SparseArray<File> files = Utils.getDataFiles("/rHAR/data/train/");
+        if (files == null){
+            ttcallback.onTrainingFinished("No training data found!");
             return;
-        Log.i(Utils.TAG, String.format("Files of label %d are: %d.", label, files.size()));
+        }
+
         for (int i = 0; i < files.size(); ++i) {
+            File file = files.valueAt(i);
+            int label = Integer.parseInt(file.getName().replace(".csv", ""));
             try {
-                File file = files.valueAt(i);
-                Log.i(Utils.TAG, String.format("Training file: %s.", file.getName()));
+                Log.i("rHAR", String.format("Training file: %s.", file.getName()));
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String line;
                 int count = 0;
-                while ((line = br.readLine()) != null && count < FEATURE_DATA_BATCH_SIZE) {
+                while ((line = br.readLine()) != null) {
                     line = line.replace("\n", "").trim();
-                    if (!line.isEmpty()) {
+                    if(!line.isEmpty()){
                         String[] data = line.split(",");
-                        if (data.length > 0) {
+                        if(data.length > 0){
                             SensorData sd = new SensorData();
-                            sd.accelerate[0] = Float.parseFloat(data[0]);
-                            sd.accelerate[1] = Float.parseFloat(data[1]);
-                            sd.accelerate[2] = Float.parseFloat(data[2]);
-                            if (periodVal[count] == null) {
+                            sd.world_accelerometer[0] = Float.parseFloat(data[0]);
+                            sd.world_accelerometer[1] = Float.parseFloat(data[1]);
+                            sd.world_accelerometer[2] = Float.parseFloat(data[2]);
+                            if (periodVal[count] == null){
                                 periodVal[count] = new SensorData();
                             }
                             periodVal[count].clone(sd);
                         }
                     }
                     ++count;
+                    if(count == FEATURE_DATA_BATCH_SIZE){
+                        getFeature(periodVal, label);
+                    }
+                    count = count % FEATURE_DATA_BATCH_SIZE;
                 }
                 br.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            getFeature(periodVal, label);
         }
     }
 
     private void getFeature(SensorData[] sensorData, int label) {
         Feature feature = new Feature();
-        feature.extractFeatures(sensorData);
+        feature.extractFeatures(sensorData, SAMPLE_FREQUENCY, FEATURE_DATA_BATCH_SIZE);
 
         rfFeatures.put(rfFeatures.size(), feature);
         rfLabels.put(rfLabels.size(), label);
@@ -202,14 +210,20 @@ class MynaTrainTest {
     private String switchClass(final int status) {
         String choClass = "";
         switch (status) {
-            case 1:
-                choClass = "1,0,0";
+            case RecognizedActivity.WALKING:
+                choClass = "1,0,0,0,0";
                 break;
-            case 4:
-                choClass = "0,1,0";
+            case RecognizedActivity.RUNNING:
+                choClass = "0,1,0,0,0";
                 break;
-            case 7:
-                choClass = "0,0,1";
+            case RecognizedActivity.BUS:
+                choClass = "0,0,1,0,0";
+                break;
+            case RecognizedActivity.SUBWAY:
+                choClass = "0,0,0,1,0";
+                break;
+            case RecognizedActivity.CAR:
+                choClass = "0,0,0,0,1";
                 break;
             default:
                 break;
@@ -218,146 +232,117 @@ class MynaTrainTest {
     }
 
     private String get1AxisData(final SensorFeature sf) {
-        return sf.minx + "," +
-                sf.miny + "," +
-                sf.minz + "," +
-                sf.maxx + "," +
-                sf.maxy + "," +
-                sf.maxz + "," +
-                sf.avgx + "," +
-                sf.avgy + "," +
-                sf.avgz + "," +
-                sf.varx + "," +
-                sf.vary + "," +
-                sf.varz + "," +
-                sf.rangex + "," +
-                sf.rangey + "," +
-                sf.rangez + "," +
-                sf.jumpx + "," +
-                sf.jumpy + "," +
-                sf.jumpz + "," +
-                sf.fallx + "," +
-                sf.fally + "," +
-                sf.fallz + "," +
-                sf.amp1x + "," +
-                sf.amp1y + "," +
-                sf.amp1z + "," +
-                sf.amp2x + "," +
-                sf.amp2y + "," +
-                sf.amp2z + "," +
-                sf.amp3x + "," +
-                sf.amp3y + "," +
-                sf.amp3z + "," +
-                sf.freq1x + "," +
-                sf.freq1y + "," +
-                sf.freq1z + "," +
-                sf.freq2x + "," +
-                sf.freq2y + "," +
-                sf.freq2z + "," +
-                sf.freq3x + "," +
-                sf.freq3y + "," +
-                sf.freq3z;
+        return sf.minX + "," +
+                sf.maxX + "," +
+                sf.meanX + "," +
+                sf.stdDevX + "," +
+                sf.meanApproximationX + "," +
+                sf.stdDevApproximationX + "," +
+                sf.magnitudeX + "," +
+                sf.freqX + "," +
+
+                sf.minY + "," +
+                sf.maxY + "," +
+                sf.meanY + "," +
+                sf.stdDevY + "," +
+                sf.meanApproximationY + "," +
+                sf.stdDevApproximationY + "," +
+                sf.magnitudeY + "," +
+                sf.freqY + "," +
+
+                sf.minZ + "," +
+                sf.maxZ + "," +
+                sf.meanZ + "," +
+                sf.stdDevZ + "," +
+                sf.meanApproximationZ + "," +
+                sf.stdDevApproximationZ + "," +
+                sf.magnitudeZ + "," +
+                sf.freqZ;
     }
 
     private void addFile() {
         String strBuilder = "@relation MultiLabelData\n\n" +
-                "@attribute Accelerometer_min_x numeric\n" +
-                "@attribute Accelerometer_min_y numeric\n" +
-                "@attribute Accelerometer_min_z numeric\n" +
-                "@attribute Accelerometer_max_x numeric\n" +
-                "@attribute Accelerometer_max_y numeric\n" +
-                "@attribute Accelerometer_max_z numeric\n" +
-                "@attribute Accelerometer_avg_x numeric\n" +
-                "@attribute Accelerometer_avg_y numeric\n" +
-                "@attribute Accelerometer_avg_z numeric\n" +
-                "@attribute Accelerometer_var_x numeric\n" +
-                "@attribute Accelerometer_var_y numeric\n" +
-                "@attribute Accelerometer_var_z numeric\n" +
-                "@attribute Accelerometer_range_x numeric\n" +
-                "@attribute Accelerometer_range_y numeric\n" +
-                "@attribute Accelerometer_range_z numeric\n" +
-                "@attribute Accelerometer_jump_x numeric\n" +
-                "@attribute Accelerometer_jump_y numeric\n" +
-                "@attribute Accelerometer_jump_z numeric\n" +
-                "@attribute Accelerometer_fall_x numeric\n" +
-                "@attribute Accelerometer_fall_y numeric\n" +
-                "@attribute Accelerometer_fall_z numeric\n" +
-                "@attribute Accelerometer_amp1_x numeric\n" +
-                "@attribute Accelerometer_amp1_y numeric\n" +
-                "@attribute Accelerometer_amp1_z numeric\n" +
-                "@attribute Accelerometer_amp2_x numeric\n" +
-                "@attribute Accelerometer_amp2_y numeric\n" +
-                "@attribute Accelerometer_amp2_z numeric\n" +
-                "@attribute Accelerometer_amp3_x numeric\n" +
-                "@attribute Accelerometer_amp3_y numeric\n" +
-                "@attribute Accelerometer_amp3_z numeric\n" +
-                "@attribute Accelerometer_freq1_x numeric\n" +
-                "@attribute Accelerometer_freq1_y numeric\n" +
-                "@attribute Accelerometer_freq1_z numeric\n" +
-                "@attribute Accelerometer_freq2_x numeric\n" +
-                "@attribute Accelerometer_freq2_y numeric\n" +
-                "@attribute Accelerometer_freq2_z numeric\n" +
-                "@attribute Accelerometer_freq3_x numeric\n" +
-                "@attribute Accelerometer_freq3_y numeric\n" +
-                "@attribute Accelerometer_freq3_z numeric\n" +
-                "@attribute On_foot {0,1}\n" +
-                "@attribute In_vehicle {0,1}\n" +
-                "@attribute Still {0,1}\n" +
+                "@attribute Accelerometer_minX numeric\n" +
+                "@attribute Accelerometer_maxX numeric\n" +
+                "@attribute Accelerometer_meanX numeric\n" +
+                "@attribute Accelerometer_stdDevX numeric\n" +
+                "@attribute Accelerometer_meanApproximationX numeric\n" +
+                "@attribute Accelerometer_stdDevApproximationX numeric\n" +
+                "@attribute Accelerometer_magnitudeX numeric\n" +
+                "@attribute Accelerometer_freqX numeric\n" +
+
+                "@attribute Accelerometer_minY numeric\n" +
+                "@attribute Accelerometer_maxY numeric\n" +
+                "@attribute Accelerometer_meanY numeric\n" +
+                "@attribute Accelerometer_stdDevY numeric\n" +
+                "@attribute Accelerometer_meanApproximationY numeric\n" +
+                "@attribute Accelerometer_stdDevApproximationY numeric\n" +
+                "@attribute Accelerometer_magnitudeY numeric\n" +
+                "@attribute Accelerometer_freqY numeric\n" +
+
+                "@attribute Accelerometer_minZ numeric\n" +
+                "@attribute Accelerometer_maxZ numeric\n" +
+                "@attribute Accelerometer_meanZ numeric\n" +
+                "@attribute Accelerometer_stdDevZ numeric\n" +
+                "@attribute Accelerometer_meanApproximationZ numeric\n" +
+                "@attribute Accelerometer_stdDevApproximationZ numeric\n" +
+                "@attribute Accelerometer_magnitudeZ numeric\n" +
+                "@attribute Accelerometer_freqZ numeric\n" +
+
+                "@attribute WALKING {0,1}\n" +
+                "@attribute RUNNING {0,1}\n" +
+                "@attribute BUG {0,1}\n" +
+                "@attribute SUBWAY {0,1}\n" +
+                "@attribute CAR {0,1}\n" +
                 "@data\n";
 
         Utils.saveAsAppend(context.getApplicationContext(), strBuilder, ARF_FILE_NAME);
     }
 
-    private SparseIntArray y_true = new SparseIntArray();
-    private SparseArray<Float> score_1 = new SparseArray<>();
-    private SparseArray<Float> score_4 = new SparseArray<>();
-    private SparseArray<Float> score_7 = new SparseArray<>();
-
-    void startTestingWithExistedData() {
-        if(!Utils.isFileExists(context, "classificator.json")){
-            ttcallback.onFinalReport(null);
+    void startTestingWithExistedData(final String classifierType){
+        SparseArray<File> files = Utils.getDataFiles("/rHAR/data/test/");
+        if (files == null){
+            ttcallback.onFinalReport("No testing data found!", 0);
             return;
         }
-
-        startTestingWithExistedData(1);
-        startTestingWithExistedData(4);
-        startTestingWithExistedData(7);
-
-        for(int i = 0; i < y_true.size(); ++i){
-            Utils.saveAsAppend(context,
-                    String.format(Locale.getDefault(), "%d,%.6f,%.6f,%.6f\n",
-                            y_true.valueAt(i), score_1.valueAt(i), score_4.valueAt(i), score_7.valueAt(i)),
-                    "roc.log");
+        String featureFileName = classifierType + "features.csv";
+        String finalDescription = null;
+        switch (classifierType) {
+            case RandomForestClassifier.TYPE:
+                generateRFClassifier();
+                finalDescription = String.format(Locale.getDefault(), "RDTSettings - attrSize: %d, labelNum: %d, maxS: %d, treeNum: %d, maxTreeDepth: %d",
+                        attrSize, labelNum, maxS, treeNum, maxTreeDepth);
+                break;
+            case XGBoostClassifier.TYPE:
+                generateXGBoostClassifier();
+                break;
+            case LSTMClassifier.TYPE:
+                generateLSTMClassifier();
+                break;
+            default:
+                ttcallback.onFinalReport("Unsupported classifier type!", 0);
+                return;
         }
+        Utils.deleteFile(featureFileName);
 
-        String RDTSettings = String.format(Locale.getDefault(), "RDTSettings - attrSize: %d, labelNum: %d, maxS: %d, treeNum: %d, maxTreeDepth: %d",
-                attrSize, labelNum, maxS, treeNum, maxTreeDepth);
-        ttcallback.onFinalReport(RDTSettings + "\n");
-    }
-
-    private void startTestingWithExistedData(final int label) {
-        SparseArray<File> files = Utils.getDataFiles("/rHAR/data/test/" + String.valueOf(label));
-        if (files == null)
-            return;
-
-        String trainedTrees = Utils.load(context, "classificator.json");
-        RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
+        long startTime = System.currentTimeMillis();
         for (int i = 0; i < files.size(); ++i) {
             File file = files.valueAt(i);
+            int label = Integer.parseInt(file.getName().replace(".csv", ""));
             try {
-                Log.i("rHAR", String.format("Training file: %s.", file.getName()));
+                Log.i("rHAR", String.format("Testing file: %s.", file.getName()));
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String line;
                 int count = 0;
-                while ((line = br.readLine()) != null && count < FEATURE_DATA_BATCH_SIZE) {
+                while ((line = br.readLine()) != null) {
                     line = line.replace("\n", "").trim();
                     if(!line.isEmpty()){
                         String[] data = line.split(",");
                         if(data.length > 0){
                             SensorData sd = new SensorData();
-                            sd.accelerate[0] = Float.parseFloat(data[0]);
-                            sd.accelerate[1] = Float.parseFloat(data[1]);
-                            sd.accelerate[2] = Float.parseFloat(data[2]);
+                            sd.world_accelerometer[0] = Float.parseFloat(data[0]);
+                            sd.world_accelerometer[1] = Float.parseFloat(data[1]);
+                            sd.world_accelerometer[2] = Float.parseFloat(data[2]);
                             if (periodVal[count] == null){
                                 periodVal[count] = new SensorData();
                             }
@@ -365,20 +350,57 @@ class MynaTrainTest {
                         }
                     }
                     ++count;
+                    if(count == FEATURE_DATA_BATCH_SIZE){
+                        double[] probabilities = classifier.recognize(periodVal, SAMPLE_FREQUENCY, FEATURE_DATA_BATCH_SIZE);
+                        handleTestingProgress(probabilities, label, featureFileName);
+                    }
+                    count = count % FEATURE_DATA_BATCH_SIZE;
                 }
                 br.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            double[] probRDT = randomForestClassifier.recognize(periodVal);
-            long startTime = System.currentTimeMillis();
-            long durationRDT = System.currentTimeMillis() - startTime;
-            int[] act = {1, 4, 7};
-            y_true.put(y_true.size(), label);
-            score_1.put(score_1.size(), (float)probRDT[0]);
-            score_4.put(score_4.size(), (float)probRDT[1]);
-            score_7.put(score_7.size(), (float)probRDT[2]);
-            ttcallback.onTestingResult(act, probRDT, durationRDT, file.getAbsolutePath(), label);
         }
+        long durationRDT = System.currentTimeMillis() - startTime;
+        ttcallback.onFinalReport(finalDescription, durationRDT);
+    }
+
+    private void generateRFClassifier() {
+        if(!Utils.isFileExists(context, "classificator.json")){
+            ttcallback.onFinalReport("No random forest model found!", 0);
+            return;
+        }
+        String trainedTrees = Utils.load(context, "classificator.json");
+        classifier = new RandomForestClassifier(trainedTrees);
+    }
+
+    private void generateXGBoostClassifier() {
+        classifier = new XGBoostClassifier(context);
+    }
+
+    private void generateLSTMClassifier() {
+        classifier = new LSTMClassifier(context);
+    }
+
+    private void handleTestingProgress(double[] probabilities, int label, String featureName){
+        RecognizedActivityResult result = new RecognizedActivityResult();
+        result.activities = new RecognizedActivity[labels.length];
+        for(int index = 0; index < labels.length; ++index){
+            result.activities[index] = new RecognizedActivity(labels[index], probabilities[index]);
+
+        }
+        double[] features = classifier.getCurrentFeatures();
+        if(features != null){
+            StringBuilder sb = new StringBuilder();
+            for(double f: features){
+                sb.append((float)f);
+                sb.append(",");
+            }
+            sb.append(",");
+            sb.append(String.valueOf(label));
+            sb.append("\n");
+            Utils.saveAsAppend(context, sb.toString(), featureName);
+        }
+        ttcallback.onTestingResult(result, label);
     }
 }

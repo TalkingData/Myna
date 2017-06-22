@@ -15,11 +15,17 @@ Myna 提供了两套接口：
 - 面向开发者的接口：开发者只需要简单的接口调用，就能在应用程序中获取实时识别的用户行为状态。
 - 面向数据科学家的接口：数据科学家可以很方便地添加新的识别算法，在运行时调整订阅的传感器类型、采样频率和采样时长，而无需关心 Android 系统相关的传感器数据订阅细节。
 
-目前 Myna 可以识别下面三种行为类型：
+## 更新 2017-06-19
 
-1. On_Foot
-2. In_Vehicle
-3. Still
+- 支持下面三种行为类型：
+	1. Walking
+	2. Running
+	3. Bus
+	4. Subway
+	5. Car
+- 新增 XGBoost 和基于 Tensorflow 的 LSTM 分类模型。
+	1. `Dataset` 目录下有数据集下载链接、数据处理脚本和 XGBoost 模型训练脚本。
+	2. 使用 LSTM 模型需要时需要提供训练好的模型和 Tensorflow 的动态库以及 Java Interface 包，预训练模型已经包含在 Myna 中，Tensorflow 动态库和 Java Interface 比较大，没有放在 repo 中，可以从 [Google Drive](https://drive.google.com/open?id=0B2hKiPsUlgibbklJaEh4V1o1MlU) 下载，或者按照官方文档提供的教程自己编译，放在 `lib-Myna/libs` 目录下就可以运行测试工程了。
 
 Myna 使用随机森林分类算法的一种开源实现--**Dice** 进行的实时用户行为识别：
 
@@ -27,9 +33,17 @@ Myna 使用随机森林分类算法的一种开源实现--**Dice** 进行的实�
 
 - [Dice文档](http://www.dice4dm.com/doc/index.html)
 
-Myna中内置了一个已经训练好的模型文件，在运行时加载。模型的 ROC 为：
+当使用 XGBoost 进行分类时。模型的 metrics 为：
 
-![](http://p1.bqimg.com/562611/13d6243cab1e64d8.png)
+	Precision 0.964143858121
+	Recall 0.964285714286
+	f1_score 0.963936330023
+	confusion_matrix
+	[[67  0  0  0  0]
+	 [ 0 75  0  0  0]
+	 [ 0  0 52  1  3]
+	 [ 0  0  0 39  0]
+	 [ 0  0  5  1 37]]
 
 ## 集成文档
 
@@ -37,17 +51,11 @@ Myna中内置了一个已经训练好的模型文件，在运行时加载。模�
 
 ## Roadmap
 
-2016 年 12 月
+2017 年 6 月
 
-	1. 开源包含训练代码的 Android App 和数据集。
-	2. 开源模型评价和 Plot 的 Python 代码。
-	3. 增加手持状态检测能力。
-	3. 增加对更多行为的识别能力。
+	1. 增加手持状态检测能力。
+	2. 增加对更多行为的识别能力。
 
-2017 年
-
-	1. 加入更多机器学习算法。
-	2. 移植 Tensorflow 的 CNN 实现到 Android 端。
 
 ## License
 

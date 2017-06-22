@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/bt_rf_training"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RandomForest training"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/bt_rf_testing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RandomForest inference"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/bt_xgboost_testing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="XGBoost inference"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/bt_lstm_testing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LSTM inference"
+        android:textAllCaps="false" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="300dp">
+
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </ScrollView>
+
+</LinearLayout>

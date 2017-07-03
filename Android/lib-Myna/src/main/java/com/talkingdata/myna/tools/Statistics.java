@@ -47,7 +47,7 @@ public class Statistics {
             }
         }
         freqAndMag[0] = sampleFreq * 1.0f / sampleCount * max_index;
-        freqAndMag[1] = (float)max_magnitude;
+        freqAndMag[1] = (float)max_magnitude / 100.0f;
         return freqAndMag;
     }
 

@@ -63,6 +63,7 @@ public class TrainActivity extends AppCompatActivity {
                     case XGBOOST_TESTING:
                         resetTestingResults();
                         MynaApi.test(new MyTrainTestImpl(), getApplicationContext(), XGBoostClassifier.TYPE);
+                        break;
                     case LSTM_TESTING:
                         resetTestingResults();
                         MynaApi.test(new MyTrainTestImpl(), getApplicationContext(), LSTMClassifier.TYPE);
@@ -117,6 +118,7 @@ public class TrainActivity extends AppCompatActivity {
                 bt_xgboost_testing.setEnabled(false);
                 bt_rf_training.setEnabled(false);
                 bt_rf_testing.setEnabled(false);
+                bt_lstm_testing.setEnabled(false);
             }
         });
     }
@@ -130,6 +132,7 @@ public class TrainActivity extends AppCompatActivity {
                 bt_xgboost_testing.setEnabled(true);
                 bt_rf_training.setEnabled(true);
                 bt_rf_testing.setEnabled(true);
+                bt_lstm_testing.setEnabled(true);
             }
         });
     }
@@ -146,6 +149,7 @@ public class TrainActivity extends AppCompatActivity {
         hMap.put(getActivityName(RecognizedActivity.BUS), 0);
         hMap.put(getActivityName(RecognizedActivity.SUBWAY), 0);
         hMap.put(getActivityName(RecognizedActivity.CAR), 0);
+        hMap.put(getActivityName(RecognizedActivity.STILL), 0);
     }
 
     private String getActivityName(final int label){
@@ -232,7 +236,7 @@ public class TrainActivity extends AppCompatActivity {
                 if(totalCount != 0){
                     successfulRateRDT = succeededCountRDT * 100 / totalCount;
                 }
-                sb.append(String.format(Locale.CHINESE, "\t%-12s\t%3d/%-3d(%3d%%)\n", keyStr,
+                sb.append(String.format(Locale.getDefault(), "\t%-12s\t%3d/%-3d(%3d%%)\n", keyStr,
                         succeededCountRDT, totalCount, successfulRateRDT));
             }
             final String reportStr = sb.toString();

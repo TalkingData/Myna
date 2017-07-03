@@ -28,11 +28,11 @@ import dice.tree.structure.Node;
 class MynaTrainTest {
     private MynaTrainTestCallback ttcallback;
     private Context context;
-    private int attrSize = 29;
-    private int labelNum = 5;
+    private int attrSize = 30;
+    private int labelNum = 6;
     private int maxS = 10;
-    private int treeNum = 3;
-    private int maxTreeDepth = 14;
+    private int treeNum = 5;
+    private int maxTreeDepth = 15;
     private Node[] trees = new Node[treeNum];
 
     private SparseArray<Feature> rfFeatures = new SparseArray<>();
@@ -50,7 +50,8 @@ class MynaTrainTest {
             RecognizedActivity.RUNNING,
             RecognizedActivity.BUS,
             RecognizedActivity.SUBWAY,
-            RecognizedActivity.CAR};
+            RecognizedActivity.CAR,
+            RecognizedActivity.STILL};
 
 
     MynaTrainTest(MynaTrainTestCallback callback, Context ctx) {
@@ -211,19 +212,22 @@ class MynaTrainTest {
         String choClass = "";
         switch (status) {
             case RecognizedActivity.WALKING:
-                choClass = "1,0,0,0,0";
+                choClass = "1,0,0,0,0,0";
                 break;
             case RecognizedActivity.RUNNING:
-                choClass = "0,1,0,0,0";
+                choClass = "0,1,0,0,0,0";
                 break;
             case RecognizedActivity.BUS:
-                choClass = "0,0,1,0,0";
+                choClass = "0,0,1,0,0,0";
                 break;
             case RecognizedActivity.SUBWAY:
-                choClass = "0,0,0,1,0";
+                choClass = "0,0,0,1,0,0";
                 break;
             case RecognizedActivity.CAR:
-                choClass = "0,0,0,0,1";
+                choClass = "0,0,0,0,1,0";
+                break;
+            case RecognizedActivity.STILL:
+                choClass = "0,0,0,0,0,1";
                 break;
             default:
                 break;
@@ -294,6 +298,7 @@ class MynaTrainTest {
                 "@attribute BUG {0,1}\n" +
                 "@attribute SUBWAY {0,1}\n" +
                 "@attribute CAR {0,1}\n" +
+                "@attribute STILL {0,1}\n" +
                 "@data\n";
 
         Utils.saveAsAppend(context.getApplicationContext(), strBuilder, ARF_FILE_NAME);
@@ -314,9 +319,11 @@ class MynaTrainTest {
                         attrSize, labelNum, maxS, treeNum, maxTreeDepth);
                 break;
             case XGBoostClassifier.TYPE:
+                finalDescription = "XGBoost";
                 generateXGBoostClassifier();
                 break;
             case LSTMClassifier.TYPE:
+                finalDescription = "LSTM";
                 generateLSTMClassifier();
                 break;
             default:

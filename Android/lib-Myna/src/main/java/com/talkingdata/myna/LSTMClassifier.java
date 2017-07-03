@@ -17,7 +17,7 @@ public class LSTMClassifier implements ClassifierInterface {
     private static final String[] OUTPUT_NODES = {"output"};
     private static final String OUTPUT_NODE = "output";
     private static final int INPUT_SIZE = 3 * 128;
-    private static final int OUTPUT_SIZE = 5;
+    private static final int OUTPUT_SIZE = 6;
 
     public LSTMClassifier(final Context ctx) {
         AssetManager assetManager = ctx.getAssets();
@@ -34,12 +34,10 @@ public class LSTMClassifier implements ClassifierInterface {
      */
     private float[] prepareFeatures(SensorData[] sData, final int sampleCount) {
         float[] input = new float[INPUT_SIZE];
-        if(sData.length == sampleCount){
-            for(int i = 0; i < sData.length; ++i){
-                input[3 * i] = sData[i].world_accelerometer[0];
-                input[3 * i + 1] = sData[i].world_accelerometer[1];
-                input[3 * i + 2] = sData[i].world_accelerometer[2];
-            }
+        for(int i = 0; i < sampleCount; ++i){
+            input[3 * i] = sData[i].world_accelerometer[0];
+            input[3 * i + 1] = sData[i].world_accelerometer[1];
+            input[3 * i + 2] = sData[i].world_accelerometer[2];
         }
         return input;
     }

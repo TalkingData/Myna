@@ -83,8 +83,8 @@ public class DataScientistActivity extends AppCompatActivity {
         String trainedTrees = Utils.loadFeaturesFromAssets(getApplicationContext(), "classificator.json");
         RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
         HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, new MyCallback());
-        humanActivityRecognizer.setSamplingPointCount(512);
-        humanActivityRecognizer.setSamplingDuration(20);
+        humanActivityRecognizer.setSamplingPointCount(128);
+        humanActivityRecognizer.setSamplingDuration(50);
         DataScientistAPI.addRecognizer(humanActivityRecognizer);
         DataScientistAPI.start();
     }

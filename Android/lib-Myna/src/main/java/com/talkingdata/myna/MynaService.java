@@ -197,7 +197,7 @@ public class MynaService extends Service implements SensorEventListener {
                                     @Override
                                     public void run() {
                                         recognizer.onResult(recognizer.classifier.recognize(recognizer.dataSet,
-                                                1000 / recognizer.getSamplingDuration(),
+                                                1000 / recognizer.getSamplingInterval(),
                                                 recognizer.getSamplingPointCount()));
                                     }
                                 });
@@ -210,7 +210,7 @@ public class MynaService extends Service implements SensorEventListener {
                             recognizer.resetRecognizer();
                         }
                     }
-                    recognizer.dataFusionHandler.postDelayed(this, recognizer.getSamplingDuration());
+                    recognizer.dataFusionHandler.postDelayed(this, recognizer.getSamplingInterval());
                 }
             });
         }
@@ -276,8 +276,8 @@ public class MynaService extends Service implements SensorEventListener {
             latestSampledData.temperature = event.values[0];
         } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             updateSensorData(latestSampledData.magnetic, event);
-        } else if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-            updateSensorData(latestSampledData.magnetic, event);
+        } else if (event.sensor.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR) {
+            updateSensorData(latestSampledData.game_rotation_vector, event);
         }
     }
 

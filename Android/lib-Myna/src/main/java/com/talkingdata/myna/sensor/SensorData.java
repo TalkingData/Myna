@@ -7,7 +7,7 @@ public class SensorData {
     /**
      * Sensor data
      */
-    public float[] accelerate, gyroscope, gravity, magnetic, orientation;
+    public float[] accelerate, gyroscope, gravity, magnetic, game_rotation_vector, orientation;
 
 
     /**
@@ -27,6 +27,7 @@ public class SensorData {
         gyroscope = new float[3];
         gravity = new float[3];
         magnetic = new float[3];
+        game_rotation_vector = new float[3];
         orientation = new float[3];
         world_accelerometer = new float[3];
         timestamp = System.currentTimeMillis();
@@ -41,6 +42,7 @@ public class SensorData {
         System.arraycopy(sd.gyroscope, 0, this.gyroscope, 0, 3);
         System.arraycopy(sd.gravity, 0, this.gravity, 0, 3);
         System.arraycopy(sd.magnetic, 0, this.magnetic, 0, 3);
+        System.arraycopy(sd.game_rotation_vector, 0, this.game_rotation_vector, 0, 3);
         System.arraycopy(sd.orientation, 0, this.orientation, 0, 3);
         System.arraycopy(sd.world_accelerometer, 0, this.world_accelerometer, 0, 3);
 
@@ -75,6 +77,7 @@ public class SensorData {
             obj.put("gyroscope", getXYZJsonObj(gyroscope[0], gyroscope[1], gyroscope[2]));
             obj.put("gravity", getXYZJsonObj(gravity[0], gravity[1], gravity[2]));
             obj.put("magnetic", getXYZJsonObj(magnetic[0], magnetic[1], magnetic[2]));
+            obj.put("game_rotation_vector", getXYZJsonObj(game_rotation_vector[0], game_rotation_vector[1], game_rotation_vector[2]));
             obj.put("orientation", getXYZJsonObj(orientation[0], orientation[1], orientation[2]));
             obj.put("world_accelerometer", getXYZJsonObj(world_accelerometer[0], world_accelerometer[1], world_accelerometer[2]));
             obj.put("light", light);
@@ -101,6 +104,8 @@ public class SensorData {
         sb.append(getValues(gravity));
         sb.append(",");
         sb.append(getValues(magnetic));
+        sb.append(",");
+        sb.append(getValues(game_rotation_vector));
         sb.append(",");
         sb.append(getValues(orientation));
         sb.append(",");

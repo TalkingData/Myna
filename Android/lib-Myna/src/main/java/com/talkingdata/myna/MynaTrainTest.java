@@ -31,7 +31,7 @@ class MynaTrainTest {
     private int attrSize = 30;
     private int labelNum = 6;
     private int maxS = 10;
-    private int treeNum = 5;
+    private int treeNum = 3;
     private int maxTreeDepth = 15;
     private Node[] trees = new Node[treeNum];
 
@@ -95,7 +95,7 @@ class MynaTrainTest {
         treeBuilder.setMaxS(maxS);
         treeBuilder.setClsSize(labelNum);
         treeBuilder.init();
-        trees = treeBuilder.buildTrees(labelNum);
+        trees = treeBuilder.buildTrees(treeNum);
         treeBuilder.clear();
         String newModel = getModelAsString(trainInstances.getAttributes());
         if(newModel != null && !newModel.isEmpty()){

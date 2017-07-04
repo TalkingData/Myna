@@ -21,7 +21,7 @@ abstract class MynaRecognizerAbstractClass {
     /**
      * Duration between each sampling, indicates sampling frequency.
      */
-    private int samplingDuration;
+    private int samplingInterval;
 
     /**
      * Total count of sampling points you expect to collected,
@@ -54,7 +54,7 @@ abstract class MynaRecognizerAbstractClass {
      */
     MynaRecognizerAbstractClass(ClassifierInterface classifier, MynaResultCallback resultCallback){
         chosenSensors = new SparseIntArray();
-        samplingDuration = 50;
+        samplingInterval = 50;
         samplingPointCount = 90;
         dataSetIndex = 0;
         this.classifier = classifier;
@@ -107,16 +107,16 @@ abstract class MynaRecognizerAbstractClass {
      * Set sampling duration.
      * @param duration Sampling duration
      */
-    public void setSamplingDuration(int duration){
-        samplingDuration = duration;
+    public void setSamplingInterval(int duration){
+        samplingInterval = duration;
     }
 
     /**
      * Get sampling duration
      * @return Sampling duration
      */
-    public int getSamplingDuration(){
-        return samplingDuration;
+    public int getSamplingInterval(){
+        return samplingInterval;
     }
 
     /**
@@ -138,5 +138,6 @@ abstract class MynaRecognizerAbstractClass {
 
     private void setDefaultSensors(){
         addSensorType(Sensor.TYPE_ACCELEROMETER);
+        addSensorType(Sensor.TYPE_MAGNETIC_FIELD);
     }
 }

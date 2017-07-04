@@ -33,7 +33,13 @@ public class Utils {
         float[] Rotate = new float[16];
         float[] I = new float[16];
         float[] currOrientation = new float[3];
-        SensorManager.getRotationMatrix(Rotate, I, sd.gravity, sd.magnetic);
+        if((int)(sd.game_rotation_vector[0]) == 0
+                && (int)(sd.game_rotation_vector[1]) == 0
+                && (int)(sd.game_rotation_vector[2]) == 0){
+            SensorManager.getRotationMatrix(Rotate, I, sd.accelerate, sd.magnetic);
+        }else{
+            SensorManager.getRotationMatrixFromVector(Rotate, sd.game_rotation_vector);
+        }
         SensorManager.getOrientation(Rotate, currOrientation);
         System.arraycopy(currOrientation, 0, sd.orientation, 0, 3);
 

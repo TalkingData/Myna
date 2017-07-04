@@ -1,5 +1,6 @@
 package com.talkingdata.myna.demo;
 
+import android.hardware.Sensor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.talkingdata.myna.DataScientistAPI;
+import com.talkingdata.myna.HandHoldingClassifier;
+import com.talkingdata.myna.HandHoldingRecognizer;
 import com.talkingdata.myna.HumanActivityRecognizer;
 import com.talkingdata.myna.MynaInitCallback;
 import com.talkingdata.myna.MynaResult;
@@ -76,7 +79,7 @@ public class DataScientistActivity extends AppCompatActivity {
     }
 
     private void doAsDataScientist(){
-        xgBoost();
+        handHolding();
     }
 
     private void randomForest(){
@@ -84,7 +87,7 @@ public class DataScientistActivity extends AppCompatActivity {
         RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
         HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, new MyCallback());
         humanActivityRecognizer.setSamplingPointCount(128);
-        humanActivityRecognizer.setSamplingDuration(50);
+        humanActivityRecognizer.setSamplingInterval(50);
         DataScientistAPI.addRecognizer(humanActivityRecognizer);
         DataScientistAPI.start();
     }
@@ -93,8 +96,17 @@ public class DataScientistActivity extends AppCompatActivity {
         XGBoostClassifier xgBoostClassifier = new XGBoostClassifier(this.getApplicationContext());
         HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(xgBoostClassifier, new MyCallback());
         humanActivityRecognizer.setSamplingPointCount(128);
-        humanActivityRecognizer.setSamplingDuration(50);
+        humanActivityRecognizer.setSamplingInterval(50);
         DataScientistAPI.addRecognizer(humanActivityRecognizer);
+        DataScientistAPI.start();
+    }
+
+    private void handHolding(){
+        HandHoldingClassifier xgBoostClassifier = new HandHoldingClassifier();
+        HandHoldingRecognizer handHoldingRecognizer = new HandHoldingRecognizer(xgBoostClassifier, new MyCallback());
+        handHoldingRecognizer.setSamplingInterval(20);
+        handHoldingRecognizer.addSensorType(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        DataScientistAPI.addRecognizer(handHoldingRecognizer);
         DataScientistAPI.start();
     }
 }

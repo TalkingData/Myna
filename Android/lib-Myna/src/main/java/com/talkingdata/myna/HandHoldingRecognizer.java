@@ -1,6 +1,6 @@
 package com.talkingdata.myna;
 
-public class HumanActivityRecognizer extends MynaRecognizerAbstractClass {
+public class HandHoldingRecognizer extends MynaRecognizerAbstractClass {
 
     /**
      * Recognition algorithm must be provided.
@@ -8,7 +8,7 @@ public class HumanActivityRecognizer extends MynaRecognizerAbstractClass {
      * @param classifier     Recognition algorithm
      * @param resultCallback Callback to handle the recognition result
      */
-    public HumanActivityRecognizer(ClassifierInterface classifier, MynaResultCallback resultCallback) {
+    public HandHoldingRecognizer(ClassifierInterface classifier, MynaResultCallback resultCallback) {
         super(classifier, resultCallback);
     }
 
@@ -16,12 +16,8 @@ public class HumanActivityRecognizer extends MynaRecognizerAbstractClass {
     void onResult(double[] confidences){
         RecognizedActivityResult result = new RecognizedActivityResult();
         int[] labels = {
-                RecognizedActivity.WALKING,
-                RecognizedActivity.RUNNING,
-                RecognizedActivity.BUS,
-                RecognizedActivity.SUBWAY,
-                RecognizedActivity.CAR,
-                RecognizedActivity.STILL};
+                RecognizedActivity.HAND_HOLDING,
+                RecognizedActivity.NOT_HAND_HOLDING};
         result.activities = new RecognizedActivity[labels.length];
         for(int index = 0; index < labels.length; ++index){
             result.activities[index] = new RecognizedActivity(labels[index], confidences[index]);

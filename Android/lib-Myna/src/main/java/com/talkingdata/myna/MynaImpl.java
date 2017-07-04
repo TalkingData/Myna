@@ -108,7 +108,7 @@ class MynaImpl implements MynaInterface {
                 RandomForestClassifier randomForestClassifier = new RandomForestClassifier(trainedTrees);
                 HumanActivityRecognizer humanActivityRecognizer = new HumanActivityRecognizer(randomForestClassifier, resultCallback);
                 humanActivityRecognizer.setSamplingPointCount(512);
-                humanActivityRecognizer.setSamplingDuration(20);
+                humanActivityRecognizer.setSamplingInterval(20);
                 myBinder.addRecognizer(humanActivityRecognizer);
             }
             initCallback.onSucceeded();

@@ -60,6 +60,9 @@ public class RecognizedActivity {
      */
     public final static int CAR = 103;
 
+    public final static int HAND_HOLDING = 201;
+    public final static int NOT_HAND_HOLDING = 202;
+
     /**
      * Real time human activity type
      */
@@ -129,6 +132,12 @@ public class RecognizedActivity {
                 break;
             case 103:
                 result = "CAR";
+                break;
+            case 201:
+                result = "HAND_HOLDING";
+                break;
+            case 202:
+                result = "NOT_HAND_HOLDING";
                 break;
             default:
                 break;

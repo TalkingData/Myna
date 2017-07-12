@@ -79,7 +79,7 @@ public class DataScientistActivity extends AppCompatActivity {
     }
 
     private void doAsDataScientist(){
-        handHolding();
+        xgBoost();
     }
 
     private void randomForest(){

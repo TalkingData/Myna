@@ -1,5 +1,7 @@
 package com.talkingdata.myna.tools;
 
+import java.util.Arrays;
+
 public class Statistics {
 
     public static float getMean(float[] data) {
@@ -89,5 +91,16 @@ public class Statistics {
         }else{
             return temp / (data.length - ddof);
         }
+    }
+
+    public static float getMedian(float[] data){
+        Arrays.sort(data);
+        float median;
+        if (data.length % 2 == 0)
+            median = (data[data.length/2] + data[data.length/2 - 1])/2;
+        else
+            median = data[data.length/2];
+        return median;
+
     }
 }

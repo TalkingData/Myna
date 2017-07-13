@@ -40,13 +40,26 @@ def getEnergy(a):
     return np.sum(np.power(a, 2))
 
 
-def normalize(a, i):
+def getPeakCount(a):
+    peaks = 0
+    for i in range(1, len(a) - 1):
+        if (a[i] >= a[i - 1] and a[i] > a[i + 1]) or (a[i] <= a[i - 1] and a[i] < a[i + 1]):
+            peaks += 1
+    return peaks
+
+
+def removeOutliers(a, m=5):
+    mu = np.mean(a, axis=0)
+    sigma = np.std(a, axis=0)
+    modified = [v for v in a if np.abs(v - mu) < m * sigma]
+    return modified
+
+
+def normalize(a):
     mu = np.mean(a, axis=0)
     sigma = np.std(a, axis=0)
     if sigma == 0.0:
-        print(i)
-        print(a)
-        return a
+        return a - mu
     return (a - mu) / sigma
 
 
@@ -66,6 +79,9 @@ def check_and_create_dir(folder):
 
 
 def save_utf8(file_path, content, para_mode="wb"):
+    """
+    save the given content to the given path
+    """
     """
     save the given content to the given path
     """
@@ -118,9 +134,12 @@ def extractSingleAxis(a):
             getMax(src),
             getMean(src),
             getStd(src),
+            # getMedian(src),
+            # getPeakCount(src) / batch_size,
             getMean(coe),
             getStd(coe),
-            getMax(magnitude),
+            # getMedian(coe),
+            max_magnitude / batch_size,
             20.0 / N * max_index
         )
         array.append(featureData)
@@ -143,11 +162,8 @@ def get_features(dataset_path, fFile):
         xF = extractSingleAxis(data[:, 0])
         yF = extractSingleAxis(data[:, 1])
         zF = extractSingleAxis(data[:, 2])
-        # featureData = np.sqrt(data[:, 0] * data[:, 0] + data[:, 1] * data[:, 1] + data[:, 2] * data[:, 2])
-        # allF = extractSingleAxis(featureData)
         lastLine = ""
         for i in range(0, len(xF)):
-            # currentLine = xF[i] + "," + yF[i] + "," + zF[i] + "," + allF[i] + "," + str(get0605(label)) + "\n"
             currentLine = xF[i] + "," + yF[i] + "," + zF[i] + "," + str(get0605(label)) + "\n"
             if currentLine != lastLine:
                 lastLine = currentLine
@@ -165,6 +181,8 @@ def get0605(original):
         return 3
     elif original == "103":
         return 4
+    elif original == "3":
+        return 5
 
 
 def prepare_dataset(folderPath):
@@ -173,8 +191,9 @@ def prepare_dataset(folderPath):
         print("No activity found in path: {}".format(folderPath))
         return
     for act_file in act_files:
+        print("Handling file {}".format(act_file))
         label = str(act_file).split("_")[3]
-        print("Handling file {}, label: {}".format(act_file, label))
+        print("\tlabel: {}".format(label))
         re_sampled = get_resample_dataset(os.path.join(folderPath, act_file))
         overlapped = get_half_overlap_dataset(re_sampled)
         train_dataset, test_dataset = split_train_test(overlapped)
@@ -243,23 +262,24 @@ def xgTestSelfDataset(train_X, train_Y, test_X, test_Y):
     xg_test = xgb.DMatrix(test_X, label=test_Y)
     # setup parameters for xgboost
     param = {'objective': 'multi:softprob',
-             'eta': 0.15,
-             'max_depth': 6,
+             "learning_rate": 0.05,
+             'max_depth': 5,
+             'min_child_weight': 4,
              'silent': 1,
-             'num_class': 5,
-             "n_estimators": 1000,
-             "subsample": 0.7,
-             "scale_pos_weight": 0.5,
+             'num_class': 6,
+             "n_estimators": 100,
+             "subsample": 0.85,
+             "scale_pos_weight": 0.75,
              "seed": 32}
 
     watchlist = [(xg_train, 'train'), (xg_test, 'test')]
-    num_round = 50
+    num_round = 100
 
     start = time.time()
     bst = xgb.train(param, xg_train, num_round, watchlist)
     trainDuration = time.time() - start
     start = time.time()
-    yprob = bst.predict(xg_test).reshape(test_Y.shape[0], 5)
+    yprob = bst.predict(xg_test).reshape(test_Y.shape[0], 6)
     testDuration = time.time() - start
     ylabel = np.argmax(yprob, axis=1)
 
@@ -327,14 +347,15 @@ def plotSensorData():
 
 
 def plot_confusion_matrix(cm, title='Normalized Confusion matrix', cmap=plt.cm.get_cmap("Blues")):
+    activities = ["walking", "running", "bus", "subway", "car", "stationary"]
     cm = cm / cm.astype(np.float).sum(axis=1)
     print "confusion_matrix: \n{}".format(cm)
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
-    tick_marks = np.arange(5)
-    plt.xticks(tick_marks, ["walking", "running", "bus", "subway", "car"], rotation=45)
-    plt.yticks(tick_marks, ["walking", "running", "bus", "subway", "car"])
+    tick_marks = np.arange(len(cm))
+    plt.xticks(tick_marks, activities, rotation=45)
+    plt.yticks(tick_marks, activities)
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
@@ -342,7 +363,7 @@ def plot_confusion_matrix(cm, title='Normalized Confusion matrix', cmap=plt.cm.g
 
 
 def plot_roc(y_true, y_score):
-    y = label_binarize(np.array(y_true), classes=[0, 1, 2, 3, 4])
+    y = label_binarize(np.array(y_true), classes=[0, 1, 2, 3, 4, 5])
     n_classes = y.shape[1]
     print("n_classes\n", n_classes)
     print("len(y)\n", len(y))
@@ -356,9 +377,9 @@ def plot_roc(y_true, y_score):
         fpr[i], tpr[i], _ = roc_curve(y[:, i], y_score[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
 
-    colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+    colors = cycle(['aqua', 'darkorange', 'cornflowerblue', "red", "blue", "brown"])
     for i, color in zip(range(n_classes), colors):
-        plt.plot(fpr[i], tpr[i], color=color, lw=2,
+        plt.plot(fpr[i], tpr[i], color=color, lw=1,
                  label='ROC curve of class {0} (area = {1:0.2f})'
                        ''.format(get_activity_str(i), roc_auc[i]))
 
@@ -383,15 +404,64 @@ def get_activity_str(act_id):
         return "Subway"
     elif act_id == 4:
         return "Car"
+    elif act_id == 5:
+        return "Stationary"
     return "Unknown"
 
 
-if __name__ == "__main__":
-    train_feature_file = "0605_train.csv"
-    test_feature_file = "0605_test.csv"
+def KMean(X):
+    from sklearn.cluster import KMeans
+    from sklearn.decomposition import PCA
+    num_clusters = 5
 
-    prepare_dataset("dataset/")
+    X_pca = PCA(n_components=2, whiten=True).fit_transform(X)
 
+    km = KMeans(n_clusters=num_clusters)
+    y_pred = km.fit_predict(X_pca)
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y_pred)
+    plt.show()
+
+
+def KMeanTruth(X, Y):
+    from sklearn.decomposition import PCA
+    from mpl_toolkits.mplot3d import Axes3D
+
+    X_pca = PCA(n_components=3, whiten=False, svd_solver="auto").fit_transform(X)
+    fig = plt.figure()
+    Axes3D(fig)
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], X_pca[:, 2], c=Y)
+    plt.show()
+
+
+def test_3rd_dataset():
+    train_feature_file = "3rd_train.csv"
+    test_feature_file = "3rd_test.csv"
+    #
+    # prepare_dataset("dataset/")
+    #
+    # get_features("data/train", train_feature_file)
+    # get_features("data/test", test_feature_file)
+
+    train = np.loadtxt(train_feature_file, delimiter=',')
+    test = np.loadtxt(test_feature_file, delimiter=',')
+
+    train_x = train[:, 0:train.shape[1] - 1]
+    train_y = train[:, train.shape[1] - 1]
+    test_x = test[:, 0:train.shape[1] - 1]
+    test_y = test[:, train.shape[1] - 1]
+
+    # KMeanTruth(train_x, train_y)
+
+    print("train.shape = {}, test_x = {}".format(train.shape, test_x.shape))
+    xgTestSelfDataset(train_x, train_y, test_x, test_y)
+
+
+def test_self_dataset():
+    train_feature_file = "0629_train.csv"
+    test_feature_file = "0629_test.csv"
+
+    # prepare_dataset("dataset_0629/")
+    #
     get_features("data/train", train_feature_file)
     get_features("data/test", test_feature_file)
 
@@ -402,5 +472,52 @@ if __name__ == "__main__":
     train_y = train[:, train.shape[1] - 1]
     test_x = test[:, 0:train.shape[1] - 1]
     test_y = test[:, train.shape[1] - 1]
+
+    # KMeanTruth(train_x, train_y)
+
     print("train.shape = {}, test_x = {}".format(train.shape, test_x.shape))
     xgTestSelfDataset(train_x, train_y, test_x, test_y)
+
+
+def create_balance(folderPath):
+    act_files = get_files(folderPath)
+    if len(act_files) == 0:
+        print("No activity found in path: {}".format(folderPath))
+        return
+    content = {}
+    least_line_count = 0
+    print("Totally {} files found.\n".format(len(act_files)))
+    for act_file in act_files:
+        print("Handling {}".format(act_file))
+        content[act_file] = []
+        current_line_count = 0
+        with open(os.path.join(folderPath, act_file), "r") as lines:
+            last_line = ""
+            for line in lines:
+                if last_line != line:
+                    content[act_file].append(line)
+                    current_line_count += 1
+                    last_line = line
+        print("\tCurrent line count: {}".format(current_line_count))
+        if least_line_count == 0:
+            least_line_count = current_line_count
+        elif least_line_count > current_line_count:
+            least_line_count = current_line_count
+        print("\tLeast line count: {}".format(least_line_count))
+
+    for key in content.keys():
+        new_file = os.path.join(folderPath, key)
+        print("Re_structure file: {}".format(new_file))
+        if os.path.exists(new_file):
+            os.remove(new_file)
+        current_line_index = 0
+        for item in content[key]:
+            save_utf8(new_file, item, "ap")
+            current_line_index += 1
+            if current_line_index >= least_line_count:
+                break
+
+
+if __name__ == "__main__":
+    # create_balance("dataset_0629/")
+    test_self_dataset()

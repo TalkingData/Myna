@@ -26,7 +26,7 @@ Myna 提供了两套接口：
 	6. Stationary
 - 新增 XGBoost 和基于 Tensorflow 的 LSTM 分类模型。
 	1. `Dataset` 目录下有数据集下载链接、数据处理脚本和 XGBoost 模型训练脚本。
-	2. 使用 LSTM 模型需要时需要提供训练好的模型和 Tensorflow 的动态库以及 Java Interface 包，预训练模型已经包含在 Myna 中，Tensorflow 动态库和 Java Interface 比较大，没有放在 repo 中，可以从 [Google Drive](https://drive.google.com/open?id=0B2hKiPsUlgibbklJaEh4V1o1MlU) 下载，或者按照官方文档提供的教程自己编译，放在 `lib-Myna/libs` 目录下就可以运行测试工程了。
+	2. 使用 LSTM 模型需要时需要提供训练好的模型和 Tensorflow 的动态库以及 Java Interface 包。Tensorflow 官方已经提供了通过 `AAR` 格式依赖 Tensorflow 动态库和 interface 的方法，Myna 已经更新使用该方式。具体请参考：[Android TensorFlow support](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/android/README.md)。LSTM 预训练模型位于测试工程的 `assets` 目录下。由于训练数据量不够，该模型的准确率较低，仅可用于 End2End 方案验证，请勿用于生产环境。
 
 Myna 使用随机森林分类算法的一种开源实现--**Dice** 进行的实时用户行为识别：
 

@@ -16,14 +16,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    sourceSets {
-        main {
-            jniLibs.srcDirs = ['libs']
-        }
-    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    provided 'com.google.android.gms:play-services-awareness:11.0.0'
+    compile 'org.tensorflow:tensorflow-android:1.2.0'
+    provided 'com.google.android.gms:play-services-awareness:11.0.2'
 }

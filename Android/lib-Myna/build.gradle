@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 14
@@ -19,6 +19,6 @@ android {
 }
 
 dependencies {
-    compile 'org.tensorflow:tensorflow-android:1.2.0'
-    provided 'com.google.android.gms:play-services-awareness:11.0.2'
+    compile 'org.tensorflow:tensorflow-android:1.6.0'
+    provided 'com.google.android.gms:play-services-awareness:11.8.0'
 }

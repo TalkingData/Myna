@@ -102,8 +102,8 @@ public class DataScientistActivity extends AppCompatActivity {
     }
 
     private void handHolding(){
-        HandHoldingClassifier xgBoostClassifier = new HandHoldingClassifier();
-        HandHoldingRecognizer handHoldingRecognizer = new HandHoldingRecognizer(xgBoostClassifier, new MyCallback());
+        HandHoldingClassifier classifier = new HandHoldingClassifier();
+        HandHoldingRecognizer handHoldingRecognizer = new HandHoldingRecognizer(classifier, new MyCallback());
         handHoldingRecognizer.setSamplingInterval(20);
         handHoldingRecognizer.addSensorType(Sensor.TYPE_GAME_ROTATION_VECTOR);
         DataScientistAPI.addRecognizer(handHoldingRecognizer);

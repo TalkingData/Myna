@@ -189,8 +189,8 @@ public class MynaService extends Service implements SensorEventListener {
                         }
                         recognizer.dataSet[recognizer.getSamplingPointCount() / 2 + recognizer.dataSetIndex] = new SensorData();
                         recognizer.dataSet[recognizer.getSamplingPointCount() / 2 + recognizer.dataSetIndex].clone(latestSampledData);
-                        recognizer.dataSet[recognizer.dataSetIndex].timestamp = System.currentTimeMillis();
-                        Utils.calculateWorldAcce(recognizer.dataSet[recognizer.dataSetIndex]);
+                        recognizer.dataSet[recognizer.getSamplingPointCount() / 2 + recognizer.dataSetIndex].timestamp = System.currentTimeMillis();
+                        Utils.calculateWorldAcce(recognizer.dataSet[recognizer.getSamplingPointCount() / 2 + recognizer.dataSetIndex]);
                         if (recognizer.dataSetIndex == recognizer.getSamplingPointCount() / 2 - 1) {
                             try {
                                 recognizer.recognitionHandler.post(new Runnable() {

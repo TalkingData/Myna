@@ -1,16 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'tdsdk'
-            keyPassword 'TDRocks!12'
-            storeFile file('/Users/xhrwang/work/tdsdktest.keystore')
-            storePassword 'TDRocks!12'
-        }
-    }
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.talkingdata.myna.demo"
@@ -24,19 +16,17 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.config
         }
     }
 }
 
 dependencies {
 //    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:appcompat-v7:27.1.0'
     compile project(':lib-Myna')
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.google.android.gms:play-services-awareness:11.0.0'
+    compile 'com.android.support:multidex:1.0.3'
+    compile 'com.google.android.gms:play-services-awareness:11.8.0'
 }

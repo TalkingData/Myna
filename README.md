@@ -6,7 +6,7 @@ Android 平台情景感知框架
 
 
 ![](images/myna.png)
- 
+
 
 Myna 项目中包含一个测试 Demo 工程：demo-myna, 将该工程和 Myna 项目本身导入到 Android Studio 中，就可以开始调试了。
 
@@ -17,7 +17,7 @@ Myna 提供了两套接口：
 
 ## 更新 2017-07-12
 
-- 支持下面五种行为类型：
+- 支持下面 6 种行为类型：
 	1. Walking
 	2. Running
 	3. Bus
@@ -25,8 +25,9 @@ Myna 提供了两套接口：
 	5. Car
 	6. Stationary
 - 新增 XGBoost 和基于 Tensorflow 的 LSTM 分类模型。
-	1. `Dataset` 目录下有数据集下载链接、数据处理脚本和 XGBoost 模型训练脚本。
-	2. 使用 LSTM 模型需要时需要提供训练好的模型和 Tensorflow 的动态库以及 Java Interface 包。Tensorflow 官方已经提供了通过 `AAR` 格式依赖 Tensorflow 动态库和 interface 的方法，Myna 已经更新使用该方式。具体请参考：[Android TensorFlow support](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/android/README.md)。LSTM 预训练模型位于测试工程的 `assets` 目录下。由于训练数据量不够，该模型的准确率较低，仅可用于 End2End 方案验证，请勿用于生产环境。
+  1. `Dataset` 目录下有数据集下载链接、数据处理脚本和 XGBoost 模型训练脚本。
+  2. 使用 LSTM 模型需要时需要提供训练好的模型和 Tensorflow 的动态库以及 Java Interface 包。Tensorflow 官方已经提供了通过 `AAR` 格式依赖 Tensorflow 动态库和 interface 的方法，Myna 已经更新使用该方式。具体请参考：[Android TensorFlow support](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/android/README.md)。LSTM 预训练模型位于测试工程的 `assets` 目录下。由于训练数据量不够，该模型的准确率较低，仅可用于 End2End 方案验证，请勿用于生产环境。
+- 增加手持状态检测。
 
 Myna 使用随机森林分类算法的一种开源实现--**Dice** 进行的实时用户行为识别：
 
@@ -72,7 +73,7 @@ ROC:
 开源协议： [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 	Copyright 2016 TalkingData
-	
+
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at

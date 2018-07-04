@@ -19,6 +19,6 @@ android {
 }
 
 dependencies {
-    compile 'org.tensorflow:tensorflow-android:1.6.0'
-    provided 'com.google.android.gms:play-services-awareness:11.8.0'
+    implementation 'org.tensorflow:tensorflow-android:1.8.0'
+    compileOnly 'com.google.android.gms:play-services-awareness:15.0.1'
 }

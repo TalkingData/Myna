@@ -16,6 +16,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.talkingdata.myna.sensor.SensorData;
+import com.talkingdata.myna.tools.POIProfiler;
 import com.talkingdata.myna.tools.Utils;
 
 public class MynaService extends Service implements SensorEventListener {
@@ -54,6 +55,8 @@ public class MynaService extends Service implements SensorEventListener {
      */
     private SparseArray<MynaRecognizerAbstractClass> addedRecognizers;
 
+    private POIProfiler poiProfiler;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -61,6 +64,8 @@ public class MynaService extends Service implements SensorEventListener {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         latestSampledData = new SensorData();
         addedRecognizers = new SparseArray<>();
+        poiProfiler = new POIProfiler(getApplicationContext());
+
     }
 
     @Override
@@ -160,6 +165,7 @@ public class MynaService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         unregisterListener();
+        poiProfiler.stopAll();
     }
 
     private void executeTask(int taskType){

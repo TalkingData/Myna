@@ -18,10 +18,10 @@ public class HumanActivityRecognizer extends MynaRecognizerAbstractClass {
         int[] labels = {
                 RecognizedActivity.WALKING,
                 RecognizedActivity.RUNNING,
+                RecognizedActivity.STILL,
                 RecognizedActivity.BUS,
                 RecognizedActivity.SUBWAY,
-                RecognizedActivity.CAR,
-                RecognizedActivity.STILL};
+                RecognizedActivity.CAR};
         result.activities = new RecognizedActivity[labels.length];
         for(int index = 0; index < labels.length; ++index){
             result.activities[index] = new RecognizedActivity(labels[index], confidences[index]);

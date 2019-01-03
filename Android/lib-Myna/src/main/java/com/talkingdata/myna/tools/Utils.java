@@ -1,8 +1,17 @@
 package com.talkingdata.myna.tools;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Environment;
+import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
 import android.util.SparseArray;
@@ -23,10 +32,16 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.List;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 
 public class Utils {
 
     public static final String TAG = "Myna";
+    static final boolean DEBUG = true;
 
 
     public static void calculateWorldAcce(SensorData sd){
@@ -56,7 +71,7 @@ public class Utils {
     public static String loadFeaturesFromAssets(Context ctx, String fileName){
         String content = null;
         if(ctx == null ||  fileName == null || fileName.isEmpty()){
-            return content;
+            return null;
         }
         try {
             InputStream file = ctx.getAssets().open(fileName);
@@ -91,9 +106,9 @@ public class Utils {
         return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
-    public static double get3AxisDistance(final float x, final float y, final float z){
-        return Math.sqrt(x * x + y * y + z * z);
-    }
+//    public static double get3AxisDistance(final float x, final float y, final float z){
+//        return Math.sqrt(x * x + y * y + z * z);
+//    }
 
 
     /**
@@ -141,10 +156,15 @@ public class Utils {
             return;
         }
         File dir = new File(Environment.getExternalStorageDirectory() + "/rHAR/");
+        File file = null;
         if(!dir.exists()){
-            dir.mkdir();
+            if(dir.mkdir()){
+                file = new File(dir, fileName);
+            }
         }
-        File file = new File(dir, fileName);
+        if(file == null){
+            return;
+        }
         Log.i(TAG, "Append saving, saved path: " + file.getAbsolutePath());
         try {
             FileWriter fWriter = new FileWriter(file, true);
@@ -170,9 +190,10 @@ public class Utils {
                 dir = new File(Environment.getExternalStorageDirectory() + "/rHAR/data/" + String.valueOf(label));
             }
             if(!dir.exists()){
-                dir.mkdir();
+                if(dir.mkdir()){
+                    file = new File(dir, fileName);
+                }
             }
-            file = new File(dir, fileName);
         }
         String savedPath = file.getAbsolutePath();
         Log.i(TAG, "Save path: " + savedPath);
@@ -191,7 +212,7 @@ public class Utils {
         }
     }
 
-    public static boolean isFileExists(Context ctx, String fileName){
+    public static boolean isFileExists(final Context ctx, final String fileName){
         if(ctx == null ||  fileName == null || fileName.isEmpty()){
             return false;
         }
@@ -199,7 +220,7 @@ public class Utils {
         return file.exists();
     }
 
-    public static String load(Context ctx, String fileName) {
+    public static String load(final Context ctx, final String fileName) {
         if(ctx == null ||  fileName == null || fileName.isEmpty()){
             return null;
         }
@@ -208,9 +229,10 @@ public class Utils {
         if (Environment.MEDIA_MOUNTED.equals(sdState)){
             File dir = new File(Environment.getExternalStorageDirectory() + "/rHAR/");
             if(!dir.exists()){
-                dir.mkdir();
+                if(dir.mkdir()){
+                    file = new File(dir, fileName);
+                }
             }
-            file = new File(dir, fileName);
         }
         if (file.exists()) {
             try {
@@ -228,5 +250,172 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    public static void logI(final String message){
+        if(message != null && !message.isEmpty()){
+            Log.i(TAG, message);
+        }
+    }
+
+    public static String getCurrentWifiSsid(final Context context) {
+        String ssid = null;
+        try {
+            if (Utils.hasPermission(context,
+                    android.Manifest.permission.ACCESS_WIFI_STATE)) {
+                WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                if(wifiManager != null && wifiManager.isWifiEnabled() && isWifiConnected(context)){
+                    WifiInfo info = wifiManager.getConnectionInfo();
+                    if (info != null && info.getBSSID() != null) {
+                        try {
+                            ssid = info.getSSID();
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Utils.logI(t.getMessage());
+        }
+        return ssid;
+    }
+
+    private static boolean hasPermission(final Context context, final String permission) {
+        try {
+            return context.checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+        }catch (Throwable t){
+            t.printStackTrace();
+        }
+        return false;
+    }
+
+    static boolean isWifiConnected(final Context context) {
+        try {
+            if (Utils.hasPermission(context,
+                    android.Manifest.permission.ACCESS_NETWORK_STATE) && isNetworkConnected(context)) {
+                ConnectivityManager connectivityManager = (ConnectivityManager) context
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                if(connectivityManager != null){
+                    NetworkInfo activeNet = connectivityManager.getActiveNetworkInfo();
+                    if(activeNet != null){
+                        return ConnectivityManager.TYPE_WIFI == activeNet.getType() && activeNet.isConnected();
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return false;
+    }
+
+    private static boolean isNetworkConnected(final Context context){
+        boolean isConnected = false;
+        if (Utils.hasPermission(context, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+            ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if(cm != null){
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+            }
+        }
+        return isConnected;
+    }
+
+    public static String getConnectedWifiMacAddress(final Context context) {
+        String connectedWifiMacAddress = null;
+        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        List<ScanResult> wifiList;
+        if (wifiManager != null) {
+            wifiList = wifiManager.getScanResults();
+            WifiInfo info = wifiManager.getConnectionInfo();
+            if (wifiList != null && info != null) {
+                for (int i = 0; i < wifiList.size(); i++) {
+                    ScanResult result = wifiList.get(i);
+                    if (info.getBSSID().equals(result.BSSID)) {
+                        connectedWifiMacAddress = result.BSSID;
+                    }
+                }
+            }
+        }
+        return connectedWifiMacAddress;
+    }
+
+
+    public static byte[] zlib(String content){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DeflaterOutputStream out = null;
+        Deflater deflater = new Deflater(9,true);
+        try {
+
+            out = new DeflaterOutputStream(baos, deflater);
+            out.write(content.getBytes("UTF-8"));
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null)
+                try {
+                    out.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+        }
+        deflater.end();
+        return baos.toByteArray();
+    }
+
+
+    @SuppressLint("HardwareIds")
+    public static String getIMEI(Context context) {
+        try {
+            if(Build.VERSION.SDK_INT >= 23){
+                if(context.checkSelfPermission(android.Manifest.permission.READ_PHONE_STATE)
+                        != PackageManager.PERMISSION_GRANTED){
+                    return null;
+                }
+            }
+            TelephonyManager telManager = (TelephonyManager) context
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+            if (Utils.hasPermission(context,
+                    android.Manifest.permission.READ_PHONE_STATE)) {
+                if (telManager != null){
+                    return telManager.getDeviceId();
+                }
+            }
+        } catch (Throwable t) {
+            if (Utils.DEBUG)
+                t.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static String getMacAddress() {
+        String mac = null;
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    return "";
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(Integer.toHexString(b & 0xFF)).append(":");
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                mac = res1.toString();
+            }
+        } catch (Throwable e) {
+            if (Utils.DEBUG)
+                e.printStackTrace();
+        }
+        return mac;
     }
 }

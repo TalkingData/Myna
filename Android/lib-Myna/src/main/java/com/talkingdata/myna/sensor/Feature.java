@@ -32,9 +32,6 @@ public class Feature {
             input[1][i] = sensorData[i].world_accelerometer[1];
             input[2][i] = sensorData[i].world_accelerometer[2];
         }
-//        Statistics.normalize(input[0]);
-//        Statistics.normalize(input[1]);
-//        Statistics.normalize(input[2]);
         getFeaturesInternally(input, sampleFreq, sampleCount);
     }
 
